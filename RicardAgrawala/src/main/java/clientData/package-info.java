@@ -1,7 +1,7 @@
 /**
  * Server-side classes to handle client information.
  * 
- * @author Luis Blazquez Miñambres
- * @author Samuel Gómez Sánchez
+ * @author Erick Mercado Hernández
+ * @author Daniel
  */
 package clientData;

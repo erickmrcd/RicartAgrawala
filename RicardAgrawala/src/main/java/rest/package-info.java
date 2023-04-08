@@ -1,7 +1,7 @@
 /**
  * Contains server-side-only classes.
  * 
- * @author Luis Blazquez Miñambres
- * @author Samuel Gómez Sánchez
+ * @author Erick Mercado Hernández
+ * @author Daniel
  */
 package rest;

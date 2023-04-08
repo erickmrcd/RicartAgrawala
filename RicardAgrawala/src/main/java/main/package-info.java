@@ -1,7 +1,7 @@
 /**
  * Main application's class.
  * 
- * @author Luis Blazquez Miñambres
- * @author Samuel Gómez Sánchez
+ * @author Erick Mercado Hernández
+ * @author Daniel
  */
 package main;

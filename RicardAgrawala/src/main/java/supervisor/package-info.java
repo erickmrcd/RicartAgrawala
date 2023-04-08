@@ -1,7 +1,7 @@
 /**
  * Contains the supervisor process classes.
  * 
- * @author Luis Blazquez Miñambres
- * @author Samuel Gómez Sánchez
+ * @author Erick Mercado Hernández
+ * @author Daniel
  */
 package supervisor;
