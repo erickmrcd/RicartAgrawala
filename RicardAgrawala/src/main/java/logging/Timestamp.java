@@ -9,8 +9,8 @@ package logging;
  * This representation is different from logical 'LamportTime' timestamp representation
  * as this one is exclusively used for timestamps set in logs
  *
- * @author Luis Blazquez Miñambres
- * @author Samuel Gómez Sánchez
+ * @author Erick Mercado
+ * @author Daniel 
  *
  */
 public class Timestamp implements Comparable<Timestamp> {

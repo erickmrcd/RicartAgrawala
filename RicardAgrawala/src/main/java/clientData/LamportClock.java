@@ -1,5 +1,11 @@
 package clientData;
 
+/**
+ * 
+ * @author Erick
+ * @author Daniel
+ * 
+ */
 public class LamportClock {
 	
 	private LamportTime time;
