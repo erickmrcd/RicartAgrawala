@@ -47,10 +47,6 @@ public class ClientRicart extends Thread {
 		return clientID.getClientID();
 	}
 
-	
-
-
-
 
 	public void run() {
 		Client client = ClientBuilder.newClient();
@@ -81,11 +77,7 @@ public class ClientRicart extends Thread {
 
 
 
-	private synchronized void waitOthers(WebTarget target) {
-		// TODO Auto-generated method stub
-		String inicio = target.path("rest").path("rest").path("wait").request(MediaType.TEXT_PLAIN).get(String.class);
-		System.out.println(inicio);
-	}
+	
 
 
 	private void simulateOperations() {
@@ -99,6 +91,12 @@ public class ClientRicart extends Thread {
 		}
 	}
 
+	private synchronized void waitOthers(WebTarget target) {
+		// TODO Auto-generated method stub
+		String inicio = target.path("rest").path("rest").path("wait").request(MediaType.TEXT_PLAIN).get(String.class);
+		System.out.println(inicio);
+	}
+	
 	private synchronized void enterCriticalSection(WebTarget target) {
 		// TODO Auto-generated method stub
 		String inicio = target.path("rest").path("send_request").request(MediaType.TEXT_PLAIN).get(String.class);

@@ -24,7 +24,6 @@ import clientData.CriticalSectionState;
 public class Main {
 
 	private static final int NUM_PROCESOS = 2;
-	public static CyclicBarrier s = new CyclicBarrier(5);
 	private static ClientRicart[] clients;
 
 	/**
