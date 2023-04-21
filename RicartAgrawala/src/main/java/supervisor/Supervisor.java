@@ -42,7 +42,7 @@ public class Supervisor {
 		clients.add(new ClientUID("192.168.1.136",0));
 		clients.add(new ClientUID("192.168.1.136",1));
 		clients.add(new ClientUID("192.168.1.136",2));
-		restHandler = new RestHandler(String.format("http://192.168.1.136:8080/RicardAgrawala", "localhost"));
+		restHandler = new RestHandler(String.format("http://192.168.1.136:8080/RicartAgrawala", "localhost"));
 		restHandler.callWebService(
 				"/supervisor/setup",
 				new RESTParameter("num_clients", String.valueOf(clients.size()))

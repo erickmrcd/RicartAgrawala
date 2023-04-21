@@ -247,7 +247,7 @@ public class Server {
 
 	private void answerClient(ClientUID clientId) {
 		// TODO Auto-generated method stub
-		RestHandler connectionHandler = new RestHandler(String.format("http://localhost:8080/RicardAgrawala", clientId.getIpAddress()));
+		RestHandler connectionHandler = new RestHandler(String.format("http://localhost:8080/RicartAgrawala", clientId.getIpAddress()));
 		connectionHandler.callWebService(MediaType.TEXT_PLAIN, 
 				"/rest/receive_grant",
 				new RESTParameter("id", clientId.toUniqueFilename()));

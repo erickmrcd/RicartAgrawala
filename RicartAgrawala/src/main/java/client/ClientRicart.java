@@ -19,7 +19,7 @@ import utils.Utils;
 
 public class ClientRicart extends Thread {
 
-	private static final int DEFAULT_NUMBER_ITERATIONS = 100;
+	private static final int DEFAULT_NUMBER_ITERATIONS = 10;
 	private static final int OPERATIONS_MIN_TIME = 300;
 	private static final int OPERATIONS_MAX_TIME = 500;
 	private static final int CRITICAL_SECTION_MIN_TIME = 100;
@@ -39,7 +39,7 @@ public class ClientRicart extends Thread {
 	public ClientRicart(ClientUID clientID) {
 		this.clientID = clientID;
 		this.random = new Random();
-		this.restHandler = new RestHandler("http://192.168.1.136:8080/RicardAgrawala");
+		this.restHandler = new RestHandler("http://192.168.1.136:8080/RicartAgrawala");
 		
 	}
 
@@ -65,7 +65,7 @@ public class ClientRicart extends Thread {
 		registerClient();
 		waitSynchronize();
 		clientsStart();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < DEFAULT_NUMBER_ITERATIONS; i++) {
 
 			// Simulating operations in between 0.3 and 0.5 seconds
 
@@ -76,7 +76,7 @@ public class ClientRicart extends Thread {
 			
 			// Stay in critical section
 			criticalSection();
-			writeLog("Exit");
+			
 			// Exit critical section and grant access to other clients
 			exitCriticalSection();
 
@@ -178,10 +178,10 @@ public class ClientRicart extends Thread {
 		// s1.release();
 		Response response = restHandler.callWebServiceResponse("/rest/exit",
 				new RESTParameter("id", clientID.toUniqueFilename()));
-// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
 			return Utils.FAILURE_VALUE;
 		}
+		writeLog("Exit");
 		return Utils.SUCCESS_VALUE;
 	}
 	

@@ -3,29 +3,20 @@
  */
 package main;
 
-import java.net.URI;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Semaphore;
-import java.util.logging.Logger;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
+import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import client.ClientRicart;
 import client.ClientUID;
 import client.ClientUIDGen;
-import clientData.CriticalSectionState;
 import utils.RestHandler;
 import utils.Utils;
 import utils.RESTParameter;
 
 /**
  * @author erick
- *
+ * @author Daniel
  */
 public class Main {
 
@@ -34,7 +25,7 @@ public class Main {
 	private static final Logger LOGGER = Logger.getLogger(ClientRicart.class.getName());
 	private static final String SETUP_NUM_CLIENTS_ENDPOINT = "/rest/setup_num";
 	private static final String SETUP_REMOTE_CLIENTS_ENDPOINT = "/rest/setup_remote";
-	private static final String DEFAULT_WEB_SERVICE_URI_FORMAT = "http://192.168.1.136:8080/RicardAgrawala";
+	private static final String DEFAULT_WEB_SERVICE_URI_FORMAT = "http://192.168.1.136:8080/RicartAgrawala";
 
 	private static String[] clientsIDs = null;
 	private static String[] remoteNodes = null;
