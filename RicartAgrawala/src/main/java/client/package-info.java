@@ -1,7 +1,8 @@
 /**
- * Contains client-side related classes.
  * 
- * @author Erick Mercado Hernández
- * @author Daniel
+ */
+/**
+ * @author erick
+ *
  */
 package client;

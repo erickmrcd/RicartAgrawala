@@ -27,7 +27,7 @@ import javax.ws.rs.Produces;
 @Path("/rest")
 @Singleton
 public class Server {
-	private static int numLocalClients = -1;
+	private static int numLocalClients = 3;
 	private static int numTotalClients = numLocalClients;
 	
 	private static Map<ClientUID, ClientData> localClients;

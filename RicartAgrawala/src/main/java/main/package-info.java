@@ -1,7 +1,8 @@
 /**
- * Main application's class.
  * 
- * @author Erick Mercado Hernández
- * @author Daniel
+ */
+/**
+ * @author erick
+ *
  */
 package main;

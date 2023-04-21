@@ -117,7 +117,7 @@ public class Supervisor {
 		
 		
 		// Set WEB Uri
-		RestHandler webUtils = new RestHandler(String.format("http://192.168.1.136:8080/RicardAgrawala", currentID.getIpAddress()));
+		RestHandler webUtils = new RestHandler(String.format("http://192.168.1.136:8080/RicartAgrawala", currentID.getIpAddress()));
 			
 		// Clear the last server's data
 		offsetDelayPairs.clear();

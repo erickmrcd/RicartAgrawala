@@ -1,8 +1,4 @@
-/**
- * 
- */
 package main;
-
 
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
@@ -14,13 +10,9 @@ import utils.RestHandler;
 import utils.Utils;
 import utils.RESTParameter;
 
-/**
- * @author erick
- * @author Daniel
- */
 public class Main {
-
 	private static final int NUM_PROCESOS = 3;
+
 	private static final String RESET_ENDPOINT = "/rest/reset";
 	private static final Logger LOGGER = Logger.getLogger(ClientRicart.class.getName());
 	private static final String SETUP_NUM_CLIENTS_ENDPOINT = "/rest/setup_num";
@@ -38,32 +30,29 @@ public class Main {
 	private static ClientUIDGen guidGenerator = null;
 	private static RestHandler restHandler = null;
 
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-				
 		ClientRicart[] clients = new ClientRicart[NUM_PROCESOS];
 		guidGenerator = new ClientUIDGen("localhost");
 		webServiceURI = DEFAULT_WEB_SERVICE_URI_FORMAT;
 		restHandler = new RestHandler(webServiceURI);
 		int value;
 		value = setupServer();
-		if (Utils.FAILURE_VALUE == value){
+		if (Utils.FAILURE_VALUE == value) {
 			LOGGER.info(String.format("Server setup failed"));
 			System.exit(0);
 		}
 		value = resetServer();
-		if (Utils.FAILURE_VALUE == value){
+		if (Utils.FAILURE_VALUE == value) {
 			LOGGER.info(String.format("Server restart failed"));
 			System.exit(0);
 		}
 		LOGGER.info(String.format("Server was restarted"));
-		
+
 		for (int id = 0; id < NUM_PROCESOS; id++) {
 			clients[id] = new ClientRicart(new ClientUID("192.168.1.136", id));
 		}
 		startExecution(clients);
-
 	}
 	
 	private static int resetServer() {
