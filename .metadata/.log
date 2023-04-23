@@ -4094,3 +4094,187 @@ user global configuration and to define the default location to store repositori
 not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
 EGit might behave differently since they see different configuration options.
 This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+!SESSION 2023-04-22 12:09:31.483 -----------------------------------------------
+eclipse.buildId=4.27.0.20230309-1200
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=es_ES
+Framework arguments:  -product org.eclipse.epp.package.jee.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.jee.product
+
+!ENTRY ch.qos.logback.classic 1 0 2023-04-22 12:09:32.528
+!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
+
+!ENTRY ch.qos.logback.classic 1 0 2023-04-22 12:09:35.710
+!MESSAGE Logback config file: C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.1.100.20230106-1511.xml
+
+!ENTRY org.eclipse.jface 2 0 2023-04-22 12:09:38.205
+!MESSAGE Keybinding conflicts occurred.  They may interfere with normal accelerator operation.
+!SUBENTRY 1 org.eclipse.jface 2 0 2023-04-22 12:09:38.205
+!MESSAGE A conflict occurred for CTRL+SHIFT+T:
+Binding(CTRL+SHIFT+T,
+	ParameterizedCommand(Command(org.eclipse.jdt.ui.navigate.open.type,Open Type,
+		Open a type in a Java editor,
+		Category(org.eclipse.ui.category.navigate,Navigate,null,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.jdt.ui.navigate.open.type"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(CTRL+SHIFT+T,
+	ParameterizedCommand(Command(org.eclipse.lsp4e.symbolinworkspace,Go to Symbol in Workspace,
+		,
+		Category(org.eclipse.lsp4e.category,Language Servers,null,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.lsp4e.symbolinworkspace"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+!SUBENTRY 1 org.eclipse.jface 2 0 2023-04-22 12:09:38.205
+!MESSAGE A conflict occurred for ALT+SHIFT+R:
+Binding(ALT+SHIFT+R,
+	ParameterizedCommand(Command(org.eclipse.jdt.ui.edit.text.java.rename.element,Rename - Refactoring ,
+		Rename the selected element,
+		Category(org.eclipse.jdt.ui.category.refactoring,Refactor - Java,Java Refactoring Actions,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.jdt.ui.edit.text.java.rename.element"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(ALT+SHIFT+R,
+	ParameterizedCommand(Command(org.eclipse.ui.edit.rename,Rename,
+		Rename the selected item,
+		Category(org.eclipse.ui.category.file,File,null,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.ui.edit.rename"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+
+!ENTRY org.eclipse.egit.ui 2 0 2023-04-22 12:09:42.087
+!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
+user global configuration and to define the default location to store repositories: 'C:\Users\erick'. If this is
+not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
+EGit might behave differently since they see different configuration options.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.jst.server.tomcat.core 4 0 2023-04-22 12:23:30.940
+!MESSAGE Port 8005 required by Tomcat v9.0 Server at localhost (2) is already in use. The server may already be running in another process, or a system process may be using the port. To start this server you will need to stop the other process or change the port number(s).
+
+!ENTRY org.eclipse.jst.server.tomcat.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Publishing failed with multiple errors
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\aopalliance-repackaged-2.6.1.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\hk2-api-2.6.1.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\hk2-locator-2.6.1.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\hk2-utils-2.6.1.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.activation-api-1.2.2.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.annotation-api-1.3.5.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.inject-2.6.1.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.json-1.1.6-module.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.json-1.1.6.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.json-api-1.1.6.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.json.bind-api-1.0.2.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.persistence-api-2.2.3.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.servlet-api-4.0.4.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.validation-api-2.0.2.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.ws.rs-api-2.1.6-sources.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.ws.rs-api-2.1.6.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jakarta.xml.bind-api-2.3.3.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\javassist-3.29.0-GA.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-client.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-common.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-container-servlet-core.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-container-servlet.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-hk2.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-media-jaxb.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-media-json-binding.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-media-sse.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\jersey-server.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\org.osgi.core-6.0.0.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\osgi-resource-locator-1.0.3.jar. May be locked by another process.
+!SUBENTRY 1 org.eclipse.wst.server.core 4 0 2023-04-22 20:08:11.105
+!MESSAGE Could not delete C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\RicartAgrawala\WEB-INF\lib\yasson-1.0.11.jar. May be locked by another process.
+!SESSION 2023-04-23 09:10:19.763 -----------------------------------------------
+eclipse.buildId=4.27.0.20230309-1200
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=es_ES
+Framework arguments:  -product org.eclipse.epp.package.jee.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.jee.product
+
+!ENTRY ch.qos.logback.classic 1 0 2023-04-23 09:10:20.854
+!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
+
+!ENTRY ch.qos.logback.classic 1 0 2023-04-23 09:10:27.442
+!MESSAGE Logback config file: C:\Users\erick\Documents\RicartAgrawala\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.1.100.20230106-1511.xml
+
+!ENTRY org.eclipse.jface 2 0 2023-04-23 09:10:31.214
+!MESSAGE Keybinding conflicts occurred.  They may interfere with normal accelerator operation.
+!SUBENTRY 1 org.eclipse.jface 2 0 2023-04-23 09:10:31.214
+!MESSAGE A conflict occurred for CTRL+SHIFT+T:
+Binding(CTRL+SHIFT+T,
+	ParameterizedCommand(Command(org.eclipse.jdt.ui.navigate.open.type,Open Type,
+		Open a type in a Java editor,
+		Category(org.eclipse.ui.category.navigate,Navigate,null,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.jdt.ui.navigate.open.type"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(CTRL+SHIFT+T,
+	ParameterizedCommand(Command(org.eclipse.lsp4e.symbolinworkspace,Go to Symbol in Workspace,
+		,
+		Category(org.eclipse.lsp4e.category,Language Servers,null,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.lsp4e.symbolinworkspace"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+!SUBENTRY 1 org.eclipse.jface 2 0 2023-04-23 09:10:31.214
+!MESSAGE A conflict occurred for ALT+SHIFT+R:
+Binding(ALT+SHIFT+R,
+	ParameterizedCommand(Command(org.eclipse.jdt.ui.edit.text.java.rename.element,Rename - Refactoring ,
+		Rename the selected element,
+		Category(org.eclipse.jdt.ui.category.refactoring,Refactor - Java,Java Refactoring Actions,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.jdt.ui.edit.text.java.rename.element"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(ALT+SHIFT+R,
+	ParameterizedCommand(Command(org.eclipse.ui.edit.rename,Rename,
+		Rename the selected item,
+		Category(org.eclipse.ui.category.file,File,null,true),
+		WorkbenchHandlerServiceHandler("org.eclipse.ui.edit.rename"),
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+
+!ENTRY org.eclipse.egit.ui 2 0 2023-04-23 09:10:39.153
+!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
+user global configuration and to define the default location to store repositories: 'C:\Users\erick'. If this is
+not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
+EGit might behave differently since they see different configuration options.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.

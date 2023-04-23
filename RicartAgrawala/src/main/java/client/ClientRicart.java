@@ -1,16 +1,9 @@
 package client;
 
-import java.net.URI;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import logging.Logging;
 import utils.RESTParameter;
@@ -19,7 +12,7 @@ import utils.Utils;
 
 public class ClientRicart extends Thread {
 
-	private static final int DEFAULT_NUMBER_ITERATIONS = 10;
+	private static final int DEFAULT_NUMBER_ITERATIONS = 5;
 	private static final int OPERATIONS_MIN_TIME = 300;
 	private static final int OPERATIONS_MAX_TIME = 500;
 	private static final int CRITICAL_SECTION_MIN_TIME = 100;
@@ -59,9 +52,6 @@ public class ClientRicart extends Thread {
 
 	public void run() {
 		int value;
-		// Client client = ClientBuilder.newClient();
-		// URI uri = UriBuilder.fromUri("http://localhost:8080/RicardAgrawala").build();
-		// WebTarget target = client.target(uri);
 		registerClient();
 		waitSynchronize();
 		clientsStart();
@@ -85,18 +75,20 @@ public class ClientRicart extends Thread {
 		Logging.doLog(this.clientID, stringLog.toString());
 		
 		// Send client�s log to supervisor
-		value = sendLog(clientID.toUniqueFilename("log"));
+		value = sendLog(clientID.toUniqueFilename("log"),stringLog.toString() );
 		if (Utils.FAILURE_VALUE == value){
 			LOGGER.warning(String.format("Error ocurred while sending logs in Client %d", this.getClientID()));
 			System.exit(0);
 		}
 	}
 
-	private int sendLog(String logfile) {
+	private int sendLog(String logfile, String log) {
 		LOGGER.info(String.format("[Process %d] Waiting for supervisor to synchronize...", clientID.getClientID()));
 		
 		// Send request to supervisor server with the log
-		Response response = restHandler.postFile("supervisor/inform", logfile);
+		/*Response response = restHandler.callWebServiceResponse("http://192.168.1.136:8080/RicartAgrawala/supervisor/inform", new RESTParameter[]{
+				new RESTParameter("filename", logfile),
+				new RESTParameter("streamlog",log)});
 		
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){
@@ -105,7 +97,7 @@ public class ClientRicart extends Thread {
 			return Utils.FAILURE_VALUE;
 		} 
 		
-		LOGGER.info(String.valueOf(response.getEntity()));
+		LOGGER.info(String.valueOf(response.getEntity()));*/
 		return Utils.SUCCESS_VALUE;
 
 	}
@@ -129,20 +121,26 @@ public class ClientRicart extends Thread {
 
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
-
+			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
+			LOGGER.warning(String.valueOf(response.getEntity()));
 			return Utils.FAILURE_VALUE;
 		}
+		LOGGER.info(String.valueOf(response.getEntity()));
 		return Utils.SUCCESS_VALUE;
 	}
 	
 	private int waitSynchronize() {
+		LOGGER.info(String.format("[Process %d] Waiting for supervisor to synchronize...", clientID.getClientID()));
 		Response response = restHandler.callWebServiceResponse("/rest/wait_synchronize",
 													new RESTParameter("id", clientID.toUniqueFilename()));
 		
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){
+			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
+			LOGGER.warning(String.valueOf(response.getEntity()));
 			return Utils.FAILURE_VALUE;
 		} 
+		LOGGER.info(String.valueOf(response.getEntity()));
 		return Utils.SUCCESS_VALUE;
 	}
 

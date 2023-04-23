@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.logging.Logger;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -27,9 +28,9 @@ import javax.ws.rs.Produces;
 @Path("/rest")
 @Singleton
 public class Server {
-	private static int numLocalClients = 3;
-	private static int numTotalClients = numLocalClients;
-	
+	private static int numLocalClients = -1;
+	private static int numTotalClients = -1;
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);   
 	private static Map<ClientUID, ClientData> localClients;
 
 	private static CyclicBarrier startClientBarrier = null;
@@ -57,10 +58,11 @@ public class Server {
 			                        @QueryParam(value="numTotal")String totalNumClients) {
 		numLocalClients = Integer.parseInt(localNumClients);
 		numTotalClients = Integer.parseInt(totalNumClients);
-		//System.out.println(numTotalClients);
 		return Response.status(Response.Status.OK)
 				.entity(String.format("SUCCESS: New configuration set in server")).build();
 	}
+	
+	
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
@@ -163,7 +165,9 @@ public class Server {
 			clientData.writeUnlock();
 		}else {
 			clientData.writeUnlock();
+			LOGGER.info(String.format("Client '%s' ANSWERS. Queue NOT updated", id));
 			answerClient(request.getClientId());
+			LOGGER.info(clientData.printQueue());
 		}
 	}
 	

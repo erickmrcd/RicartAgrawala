@@ -28,9 +28,9 @@ public class ClientData {
 		this.requestAccessTimestamp = new LamportTime(0);
 		this.lamportClock = new LamportClock(new LamportTime(0));
 		this.requestQueue = new LinkedList<>();
-		this.waitSynchronizeSemaphore = new Semaphore(0);
 		this.permissions = 0;
 		this.state = CriticalSectionState.FREE;
+		this.waitSynchronizeSemaphore = new Semaphore(0);
 		this.waitForResponsesStructure = new CountDownLatch(1);
 	}
 	
@@ -141,7 +141,10 @@ public class ClientData {
 	 * @return the waitSynchronizeSemaphore
 	 */
 	public Semaphore getWaitSynchronizeSemaphore() {
-		return waitSynchronizeSemaphore;
+		if(null == this.waitSynchronizeSemaphore) {
+			this.waitSynchronizeSemaphore = new Semaphore(0);
+		}
+		return this.waitSynchronizeSemaphore;
 	}
 
 	/**
@@ -163,6 +166,20 @@ public class ClientData {
 		 List<Request> l = new ArrayList<>(this.requestQueue);
 		 this.requestQueue = new LinkedList<>();
 		 return l;
+	}
+
+	public String printQueue() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\n+----+-------------+\n");
+		sb.append("| ID |   ADDRESS   |\n");
+		sb.append("+----+-------------+\n");
+		
+		for (Request r: requestQueue){
+			sb.append(String.format("| %d  | %s |\n", r.getClientId().getClientID(), r.getClientId().getIpAddress()));
+		}
+		
+		sb.append("+----+-------------+\n");
+		return sb.toString();
 	}
 	
 	

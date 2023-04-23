@@ -55,4 +55,5 @@
     <fullyQualifiedTypeName name="logging.Logging"/>
     <fullyQualifiedTypeName name="java.io.File"/>
     <fullyQualifiedTypeName name="javax.ws.rs.client.Entity"/>
+    <fullyQualifiedTypeName name="java.util.logging.Logger"/>
 </qualifiedTypeNameHistroy>

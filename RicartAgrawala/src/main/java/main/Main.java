@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 
 import client.ClientRicart;
-import client.ClientUID;
 import client.ClientUIDGen;
 import utils.RestHandler;
 import utils.Utils;
@@ -14,26 +13,17 @@ public class Main {
 	private static final int NUM_PROCESOS = 3;
 
 	private static final String RESET_ENDPOINT = "/rest/reset";
-	private static final Logger LOGGER = Logger.getLogger(ClientRicart.class.getName());
-	private static final String SETUP_NUM_CLIENTS_ENDPOINT = "/rest/setup_num";
-	private static final String SETUP_REMOTE_CLIENTS_ENDPOINT = "/rest/setup_remote";
+	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 	private static final String DEFAULT_WEB_SERVICE_URI_FORMAT = "http://192.168.1.136:8080/RicartAgrawala";
-
-	private static String[] clientsIDs = null;
-	private static String[] remoteNodes = null;
-	private static int clientsNumberIterations = -1;
-	private static int numTotalClients = 0;
-	private static String localIpAddress = "";
+	private static ClientRicart[] clients = new ClientRicart[NUM_PROCESOS];
 	private static String webServiceURI = "";
-	private static String supervisorWebServiceURI = "";
-	private static String supervisorIpAddress = "";
 	private static ClientUIDGen guidGenerator = null;
 	private static RestHandler restHandler = null;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ClientRicart[] clients = new ClientRicart[NUM_PROCESOS];
-		guidGenerator = new ClientUIDGen("localhost");
+		
+		guidGenerator = new ClientUIDGen("192.168.1.136");
 		webServiceURI = DEFAULT_WEB_SERVICE_URI_FORMAT;
 		restHandler = new RestHandler(webServiceURI);
 		int value;
@@ -50,7 +40,8 @@ public class Main {
 		LOGGER.info(String.format("Server was restarted"));
 
 		for (int id = 0; id < NUM_PROCESOS; id++) {
-			clients[id] = new ClientRicart(new ClientUID("192.168.1.136", id));
+			clients[id] = new ClientRicart(guidGenerator.nextGUID());
+			
 		}
 		startExecution(clients);
 	}
@@ -67,8 +58,8 @@ public class Main {
 		// Send number of local clients and global clients				
 		Response response = restHandler.callWebServiceResponse("/rest/setup_num",
 																				  new RESTParameter[] {
-																							new RESTParameter("numLocal", String.valueOf(3)),
-																							new RESTParameter("numTotal", String.valueOf(3))
+																							new RESTParameter("numLocal", String.valueOf(clients.length)),
+																							new RESTParameter("numTotal", String.valueOf(clients.length))
 																				  });
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){

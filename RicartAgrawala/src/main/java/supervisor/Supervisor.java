@@ -26,7 +26,6 @@ import utils.RESTParameter;
  */
 public class Supervisor {
 
-	private static final String SYNCHRONIZATION_ENDPOINT = null;
 	private static RestHandler restHandler;
 	private static  List<ClientUID> clients;
 	private static List<String> logFilenames = null;
@@ -42,7 +41,7 @@ public class Supervisor {
 		clients.add(new ClientUID("192.168.1.136",0));
 		clients.add(new ClientUID("192.168.1.136",1));
 		clients.add(new ClientUID("192.168.1.136",2));
-		restHandler = new RestHandler(String.format("http://192.168.1.136:8080/RicartAgrawala", "localhost"));
+		restHandler = new RestHandler(String.format("http://192.168.1.136:8081/RicartAgrawala", "localhost"));
 		restHandler.callWebService(
 				"/supervisor/setup",
 				new RESTParameter("num_clients", String.valueOf(clients.size()))
@@ -54,6 +53,12 @@ public class Supervisor {
 			e.printStackTrace();
 			return;
 		}
+		String s = restHandler.callWebService(
+				MediaType.TEXT_PLAIN,
+				"supervisor/collect_logs"
+		);
+		logFilenames = Arrays.asList(s.split(";"));
+		System.out.println("Collected log files.");
 		
 		for (ClientUID currentUID : clients) {
 			bestEstimations.put(currentUID, marzullo(estimations.get(currentUID)));
@@ -83,7 +88,7 @@ public class Supervisor {
 					             offsetBounds);
 		}
 		
-		Logging.mergeLogs(logFilenames, "Client.log");
+		Logging.mergeLogs(logFilenames, "clients.log");
 	}
 		
 

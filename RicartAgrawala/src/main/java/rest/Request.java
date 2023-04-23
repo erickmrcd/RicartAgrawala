@@ -1,7 +1,6 @@
 package rest;
 
 import java.text.ParseException;
-import java.util.Queue;
 
 import client.ClientUID;
 import clientData.LamportTime;

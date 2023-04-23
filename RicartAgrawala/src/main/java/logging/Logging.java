@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Logger;
 import java.util.ArrayList;
 
 import client.ClientUID;
@@ -21,7 +22,7 @@ import supervisor.Server;
  *
  */
 public final class Logging {
-
+	private final static Logger LOGGER = Logger.getLogger(Logging.class.getName());
 	private static String logFile;
 	private final static String LOG_LINE_FORMAT = "P%s %s %s";
 	private final static String COMPROBADOR_LOGS_DIRECTORY = 
@@ -154,9 +155,70 @@ public final class Logging {
 		lineParts[0] = lineParts[0].substring(1);
 		return lineParts;
 	}
-
+public static boolean checkLog(String logFile) throws IOException {
+		
+		LOGGER.info("Checking log correction...");
+		
+		Timestamp lastTimestamp = new Timestamp(-1, -1);
+		int inCriticalSection = -1;
+		
+		List<String> fileLines;
+		try {
+			fileLines = Files.readAllLines(Paths.get(logFile), Charset.defaultCharset());
+		} catch (IOException e) {
+			LOGGER.warning("Could not read file '" + logFile + "'");
+			throw new IOException(e);
+		}
+		
+		int lineCount = 1;
+		for (String line : fileLines) {
+			String[] lineParts = digestLogFileLine(line);
+			int currentPid = Integer.parseInt(lineParts[0]);
+			String messageType = lineParts[1];
+			Timestamp currentTimestamp = new Timestamp(lineParts[2]);  // Position 2 is timestamp
+			
+			// Check order
+			if (currentTimestamp.compareTo(lastTimestamp) < 0) {
+				LOGGER.info("Current timestamp is less than last timestamp. Wrong order");
+				return false;  // Wrong order
+			} else {
+				lastTimestamp = currentTimestamp;
+			}
+			
+			// Check for collision in critical section
+			if (messageType.equals("E")) {
+				if (inCriticalSection == -1) {
+					inCriticalSection = currentPid;
+				} else {
+					LOGGER.info(String.format("Critical section violation in line %d: %s", lineCount, line));
+					return false;  // Violation of critical section
+				}
+			} else if (messageType.equals("S")) {
+				if (inCriticalSection == currentPid) {
+					inCriticalSection = -1;
+				} else {
+					LOGGER.info(
+							String.format(
+									"Exiting process was not in critical section in line %d: %s",
+									lineCount,
+									line
+							)
+					);
+					return false;  // Exiting process is not process in critical section. Strange situation
+				}
+			}
+			
+			++lineCount;
+		}
+		
+		return true;
+	}
 	public static void mergeLogs(List<String> filenames, String mergedFilename) throws IOException {
 		// Load files' lines
+		LOGGER.info(String.format(
+				"Merging logs to file '%s'",
+				System.getProperty("user.dir") + File.separator + mergedFilename)
+		);
 		List<List<String>> filesAsLines = new ArrayList<>();
 		for (String filename : filenames) {
 			filesAsLines.add(Files.readAllLines(

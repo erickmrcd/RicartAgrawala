@@ -1,25 +1,20 @@
 package utils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 
-import org.glassfish.*;
-
 public class RestHandler {
 
 	private Client defaultClient;
 	private WebTarget defaultBaseWebTarget;
-	private WebTarget multipartBaseWebTarget;
 
 	/**
 	 * @param defaultClient
