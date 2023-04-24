@@ -12,15 +12,15 @@ import rest.Request;
 public class ClientData {
 	private static Semaphore generalLock = new Semaphore(1);
 	private static Semaphore permissionsLock = new Semaphore(1);
-	
+
 	private LamportTime requestAccessTimestamp;
 	private LamportClock lamportClock;
 	private Queue<Request> requestQueue;
 	private Semaphore waitSynchronizeSemaphore;
 	private int permissions;
-	private CriticalSectionState state; 
+	private CriticalSectionState state;
 	private CountDownLatch waitForResponsesStructure;
-	
+
 	/**
 	 * 
 	 */
@@ -33,7 +33,7 @@ public class ClientData {
 		this.waitSynchronizeSemaphore = new Semaphore(0);
 		this.waitForResponsesStructure = new CountDownLatch(1);
 	}
-	
+
 	public void writeLock() {
 		try {
 			ClientData.generalLock.acquire();
@@ -42,11 +42,11 @@ public class ClientData {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void writeUnlock() {
 		ClientData.generalLock.release();
 	}
-	
+
 	public int readLock() {
 		return ClientData.generalLock.availablePermits();
 	}
@@ -57,7 +57,6 @@ public class ClientData {
 	public LamportTime getRequestAccessTimestamp() {
 		return requestAccessTimestamp;
 	}
-
 
 	/**
 	 * @param requestAccessTimestamp the requestAccessTimestamp to set
@@ -72,7 +71,7 @@ public class ClientData {
 	public void setLamportClockThreadUnsafe(LamportClock lamportClock) {
 		this.lamportClock = lamportClock;
 	}
-	
+
 	/**
 	 * @return the lamportClock
 	 */
@@ -107,32 +106,32 @@ public class ClientData {
 	public void resetWaitForResponsesStructure() {
 		this.waitForResponsesStructure = new CountDownLatch(1);
 	}
-	
+
 	public void increaseLamportClockThreadUnsafe() {
 		this.lamportClock.increase();
 	}
-	
+
 	public void writeLockPermissions() {
-		//this.permissionsLock.writeLock().lock();
+		// this.permissionsLock.writeLock().lock();
 		try {
 			ClientData.permissionsLock.acquire();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void writeUnlockPermissions() {
 		ClientData.permissionsLock.release();
 	}
-	
+
 	public void addPermissionThreadUnsafe() {
 		this.permissions += 1;
 	}
-	
+
 	public int getPermissionsThreadUnsafe() {
 		return this.permissions;
 	}
-	
+
 	public void setPermissionsThreadUnsafe(int permissions) {
 		this.permissions = permissions;
 	}
@@ -141,7 +140,7 @@ public class ClientData {
 	 * @return the waitSynchronizeSemaphore
 	 */
 	public Semaphore getWaitSynchronizeSemaphore() {
-		if(null == this.waitSynchronizeSemaphore) {
+		if (null == this.waitSynchronizeSemaphore) {
 			this.waitSynchronizeSemaphore = new Semaphore(0);
 		}
 		return this.waitSynchronizeSemaphore;
@@ -153,19 +152,19 @@ public class ClientData {
 	public void resetWaitSynchronizeSemaphore() {
 		this.waitSynchronizeSemaphore = new Semaphore(0);
 	}
-	
+
 	public boolean addToQueueThreadUnsafe(Request request) {
 		return this.requestQueue.add(request);
 	}
-	
+
 	public Request nextFromQueueThreadUnsafe() {
 		return this.requestQueue.remove();
 	}
-	
-	public List<Request> removeAllFromQueueThreadUnsafe(){
-		 List<Request> l = new ArrayList<>(this.requestQueue);
-		 this.requestQueue = new LinkedList<>();
-		 return l;
+
+	public List<Request> removeAllFromQueueThreadUnsafe() {
+		List<Request> l = new ArrayList<>(this.requestQueue);
+		this.requestQueue = new LinkedList<>();
+		return l;
 	}
 
 	public String printQueue() {
@@ -173,16 +172,13 @@ public class ClientData {
 		sb.append("\n+----+-------------+\n");
 		sb.append("| ID |   ADDRESS   |\n");
 		sb.append("+----+-------------+\n");
-		
-		for (Request r: requestQueue){
+
+		for (Request r : requestQueue) {
 			sb.append(String.format("| %d  | %s |\n", r.getClientId().getClientID(), r.getClientId().getIpAddress()));
 		}
-		
+
 		sb.append("+----+-------------+\n");
 		return sb.toString();
 	}
-	
-	
-	
-	
+
 }

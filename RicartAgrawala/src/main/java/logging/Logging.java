@@ -23,7 +23,6 @@ import supervisor.Server;
  */
 public final class Logging {
 	private final static Logger LOGGER = Logger.getLogger(Logging.class.getName());
-	private static String logFile;
 	private final static String LOG_LINE_FORMAT = "P%s %s %s";
 	private final static String COMPROBADOR_LOGS_DIRECTORY = 
 			System.getProperty("user.home")
@@ -32,7 +31,7 @@ public final class Logging {
 			+ File.separator
 			+ "comprobador";
 
-	public static void normalizeLog(String string, long[] offsetBounds) {
+	public static void normalizeLog(String logFile, long[] offsetBounds) {
 		// TODO Auto-generated method stub
 		
 		List<String> fileLines = null;

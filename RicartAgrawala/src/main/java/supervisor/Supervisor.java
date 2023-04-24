@@ -22,7 +22,7 @@ import utils.RESTParameter;
 
 /**
  * @author erick
- *
+ * @author Daniel
  */
 public class Supervisor {
 
@@ -41,7 +41,7 @@ public class Supervisor {
 		clients.add(new ClientUID("192.168.1.136",0));
 		clients.add(new ClientUID("192.168.1.136",1));
 		clients.add(new ClientUID("192.168.1.136",2));
-		restHandler = new RestHandler(String.format("http://192.168.1.136:8081/RicartAgrawala", "localhost"));
+		restHandler = new RestHandler(String.format("http://192.168.1.136:8081/RicartAgrawala", "192.168.1.136"));
 		restHandler.callWebService(
 				"/supervisor/setup",
 				new RESTParameter("num_clients", String.valueOf(clients.size()))
@@ -55,7 +55,7 @@ public class Supervisor {
 		}
 		String s = restHandler.callWebService(
 				MediaType.TEXT_PLAIN,
-				"supervisor/collect_logs"
+				"/supervisor/collect_logs"
 		);
 		logFilenames = Arrays.asList(s.split(";"));
 		System.out.println("Collected log files.");
@@ -66,7 +66,7 @@ public class Supervisor {
 		
 		for (String filename : logFilenames) {
 			long[] offsetBounds = bestEstimations.get(ClientUID.fromUniqueFilename(filename));
-			Logging.normalizeLog(Server.UPLOAD_LOCATION + File.separator + filename,
+			Logging.normalizeLog(filename,
 					             offsetBounds);
 		}
 		
@@ -78,9 +78,11 @@ public class Supervisor {
 			return;
 		}
 		
+		//marzullo
 		for (ClientUID currentUID : clients) {
 			bestEstimations.put(currentUID, marzullo(estimations.get(currentUID)));
 		}
+		
 		
 		for (String filename : logFilenames) {
 			long[] offsetBounds = bestEstimations.get(ClientUID.fromUniqueFilename(filename));
@@ -89,6 +91,16 @@ public class Supervisor {
 		}
 		
 		Logging.mergeLogs(logFilenames, "clients.log");
+		
+		System.out.println(String.format(
+				"Log files check result: '%s'",
+				Logging.checkLog("clients.log") ? "Successful execution" : "Critical section violation")
+		);
+		
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Execution of Supervisor finished. Press any key to close...");
+		scanner.nextLine();
+		scanner.close();
 	}
 		
 

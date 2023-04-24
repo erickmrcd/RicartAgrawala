@@ -7,11 +7,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.OutputStream;
 import client.ClientUID;
 import utils.SynchronizationException;
 
@@ -25,6 +30,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 /**
  * @author Erick
  * @author Daniel
@@ -33,7 +41,7 @@ import javax.ws.rs.core.Response;
 @Singleton
 @Path("/supervisor")
 public class Server {
-
+	private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 	public static final String UPLOAD_LOCATION = System.getProperty("user.home") + File.separator + "tmp"
 			+ File.separator + "supervisor";
 
@@ -60,37 +68,9 @@ public class Server {
 	@Path("/setup")
 	public Response setup(@QueryParam(value = "num_clients") int numberOfClients) {
 		NUMBER_OF_CLIENTS_WAITING = numberOfClients;
+		LOGGER.info("Set up number of clients: " + numberOfClients);
 		return Response.status(200).entity("OK").build();
 	}
-
-	@POST
-	@Consumes(MediaType.TEXT_PLAIN)
-	@Path("/inform")
-	public Response inform(@QueryParam(value = "filename") String filename,
-			@QueryParam(value = "streamlog") String log) throws SynchronizationException, IOException {
-		
-		ClientUID clientUID = null;
-		try {
-			clientUID = ClientUID.fromUniqueFilename(null);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		// Duplicate if already true
-		if (finishedClients.contains(clientUID)) {
-			throw new SynchronizationException(String.format("Client %s had already finished", clientUID.toString()));
-		}
-		
-		//writeToFile(array);
-
-		finishedClients.add(clientUID);
-		if (finishedClients.size() == NUMBER_OF_CLIENTS_WAITING) {
-			availableLogsSemaphore.release();
-		}
-		String output = "File was successfully uploaded.";
-		return Response.status(200).entity(output).build();
-	}
-
 
 	@GET
 	@Path("/collect_logs")
@@ -110,16 +90,59 @@ public class Server {
 
 		return sb.toString();
 	}
+	
+	@POST
+	@Path("/inform")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response inform(
+			@FormDataParam("file") InputStream is,
+			@FormDataParam("file") FormDataContentDisposition fdcd) throws SynchronizationException, IOException
+	{
+		ClientUID clientUID = null;
+		try {
+			clientUID = ClientUID.fromUniqueFilename(fdcd.getFileName());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		LOGGER.log(Level.INFO, String.format(
+				"Client finished: {%s, %s}",
+				clientUID.toUniqueFilename(),
+				fdcd.getFileName())
+		);
+		
+		// Duplicate if already true
+		if (finishedClients.contains(clientUID)) {
+			throw new SynchronizationException(String.format("Client %s had already finished", clientUID.toString()));
+		}
+		
+		// Create directory if it does not exists
+		LOGGER.info("Checking file " + System.getProperty("user.dir") + File.separator + UPLOAD_LOCATION);
+		if (! Files.exists(Paths.get(UPLOAD_LOCATION), LinkOption.NOFOLLOW_LINKS)) {
+			throw new IOException(String.format("Destination directory '%s' does not exists", UPLOAD_LOCATION));
+		}
+		String uploadedFileLocation = UPLOAD_LOCATION + File.separator + fdcd.getFileName();
+		writeToFile(is, uploadedFileLocation);
 
-	@SuppressWarnings("unused")
-	private void writeToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
+		finishedClients.add(clientUID);
+		if (finishedClients.size() == NUMBER_OF_CLIENTS_WAITING) {
+			availableLogsSemaphore.release();
+		}
+		String output = "File was successfully uploaded.";
+		return Response.status(200).entity(output).build();
+	}
+
+
+
+	
+	private void writeToFile(InputStream is, String uploadedFileLocation) {
+		LOGGER.info("Writing file '" + uploadedFileLocation + "'");
 		try {
 			OutputStream os = new FileOutputStream(new File(uploadedFileLocation));
 			int read = 0;
 			byte[] bytes = new byte[1024];
 
 			os = new FileOutputStream(new File(uploadedFileLocation));
-			while ((read = uploadedInputStream.read(bytes)) != -1) {
+			while ((read = is.read(bytes)) != -1) {
 				os.write(bytes, 0, read);
 			}
 			os.flush();
@@ -127,7 +150,6 @@ public class Server {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 	}
-
 }

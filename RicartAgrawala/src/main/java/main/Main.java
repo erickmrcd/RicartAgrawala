@@ -2,7 +2,6 @@ package main;
 
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
-
 import client.ClientRicart;
 import client.ClientUIDGen;
 import utils.RestHandler;

@@ -1,20 +1,27 @@
 package utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.glassfish.jersey.media.multipart.*;
+import org.glassfish.jersey.media.multipart.file.*;
 
 public class RestHandler {
-
+	private final Client multipartClient;   
 	private Client defaultClient;
+	
 	private WebTarget defaultBaseWebTarget;
+	private WebTarget multipartBaseWebTarget;
 
 	/**
 	 * @param defaultClient
@@ -22,7 +29,13 @@ public class RestHandler {
 	 */
 	public RestHandler(String webTarget) {
 		this.defaultClient = ClientBuilder.newClient();
-		this.defaultBaseWebTarget = defaultClient.target((UriBuilder.fromUri(webTarget)).build());
+		this.defaultBaseWebTarget = defaultClient.target(
+				UriBuilder.fromUri(webTarget).build()
+				);
+		this.multipartClient = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
+		this.multipartBaseWebTarget = multipartClient.target(
+				UriBuilder.fromUri(webTarget).build()
+				);
 	}
 
 	/**
@@ -89,7 +102,7 @@ public class RestHandler {
 		if (parameters != null) {
 			for (RESTParameter parameter : parameters) {
 				currentTarget = currentTarget.queryParam(parameter.getName(), parameter.getValue());
-				//System.out.println(parameter.getValue());
+				// System.out.println(parameter.getValue());
 			}
 		}
 
@@ -150,21 +163,18 @@ public class RestHandler {
 	}
 
 	public Response postFile(String uri, String file) {
-	    
-		//FileDataBodyPart filePart = new FileDataBodyPart("file", new File(file));
-	    //FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-	   // FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar").bodyPart(filePart);
-	    //WebTarget currentTarget = multipartBaseWebTarget.path(uri);
-	   // Response response = currentTarget.request().post(Entity.entity(multipart, multipart.getMediaType()));
-	     
-	   /*try {
-			formDataMultiPart.close();
-		    multipart.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	     */
-	    //Use response object to verify upload success
-	    return null;
+
+		FileDataBodyPart filePart = new FileDataBodyPart("file", new File(file));
+		FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+		FormDataMultiPart multipart = (FormDataMultiPart)
+		formDataMultiPart.field("foo", "bar").bodyPart(filePart);
+		WebTarget currentTarget = multipartBaseWebTarget.path(uri);
+		Response response = currentTarget.request().post(Entity.entity(multipart, multipart.getMediaType()));
+
+		 try { formDataMultiPart.close(); multipart.close(); } catch (IOException e) {
+		  e.printStackTrace(); }
+		 
+		// Use response object to verify upload success
+		return response;
 	}
 }

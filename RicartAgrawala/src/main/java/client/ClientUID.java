@@ -71,7 +71,7 @@ public class ClientUID implements Comparable<ClientUID>{
 		if (fileExtension != null)
 			return String.format("%s_%d.%s", this.ipAddress, this.clientID, fileExtension);
 		else
-			return String.format("%s_%d.log", this.ipAddress, this.clientID);
+			return String.format("%s_%d", this.ipAddress, this.clientID);
 	}
 	
 	public String toUniqueFilename() {
