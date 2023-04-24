@@ -9,7 +9,7 @@ import utils.Utils;
 import utils.RESTParameter;
 
 public class Main {
-	private static final int NUM_PROCESOS = 3;
+	private static final int NUM_PROCESOS = 2;
 
 	private static final String RESET_ENDPOINT = "/rest/reset";
 	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());

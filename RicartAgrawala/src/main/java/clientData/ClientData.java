@@ -55,7 +55,7 @@ public class ClientData {
 	 * @return the requestAccessTimestamp
 	 */
 	public LamportTime getRequestAccessTimestamp() {
-		return requestAccessTimestamp;
+		return this.requestAccessTimestamp;
 	}
 
 	/**
@@ -76,14 +76,14 @@ public class ClientData {
 	 * @return the lamportClock
 	 */
 	public LamportClock getLamportClockThreadUnsafe() {
-		return lamportClock;
+		return this.lamportClock;
 	}
 
 	/**
 	 * @return the state
 	 */
 	public CriticalSectionState getStateThreadUnsafe() {
-		return state;
+		return this.state;
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class ClientData {
 	 * @return the waitForResponsesStructure
 	 */
 	public CountDownLatch getWaitForResponsesStructure() {
-		return waitForResponsesStructure;
+		return this.waitForResponsesStructure;
 	}
 
 	/**

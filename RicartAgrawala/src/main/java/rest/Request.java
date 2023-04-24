@@ -56,7 +56,7 @@ public class Request implements Comparable<Request>{
 
 	@Override
 	public String toString() {
-		return "Request [timestamp=" + timestamp + ", clientId=" + clientId + "]";
+		return timestamp.toString() +"#"+ clientId.toUniqueFilename();
 	}
 
 

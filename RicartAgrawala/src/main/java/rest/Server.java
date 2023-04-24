@@ -10,6 +10,7 @@ import utils.RestHandler;
 
 import java.util.List;
 import java.util.Map;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -129,17 +130,22 @@ public class Server {
 		LOGGER.info(String.format("[Client '%s'] requests access to critical section", id));
 		ClientUID uid = paramToUID(id);
 		ClientData clientData = localClients.get(uid);
-		
-		/*if (null == clientData) {
+		LOGGER.info(String.format("[Client '%s'] requests access to critical section", uid.getClientID()));
+		if (null == clientData) {
+			LOGGER.info(String.format("[Client '%s'] No existe", uid.getClientID()));
 			return Response.status(Response.Status.BAD_GATEWAY)
 					.entity(String.format("ERROR: the client with client id (%d) does not exist", uid.getClientID()))
 					.build();
-		}*/
+		}
 		Request request = updateStateAndTimestamp(uid, clientData);
+		LOGGER.info(String.format("[Client '%s'] Sending request to rest of clients [timestamp#uniqueFilename]: %s", id, request.toString()));
 		multicastRequest(uid, request);
+		LOGGER.info(String.format("[Client '%s'] Waiting for responses from other clients", id));
 		waitResponses(id, clientData);
-		enterCriticalSection(clientData);
-		return Response.status(Response.Status.OK).entity(String.format("SUCCESS", id)).build();
+		LOGGER.info(String.format("[Client '%s'] Entering critical section", id));
+		enterCriticalSection(clientData)
+		;
+		return Response.status(Response.Status.OK).entity(String.format("SUCCESS: the client '%s' is ready to enter the critical section ", id)).build();
 
 	}
 
@@ -149,11 +155,13 @@ public class Server {
 		ClientUID uid = paramToUID(id);
 		ClientData clientData = localClients.get(uid);
 		Request request = null;
-
+		System.out.println("\n");
+		LOGGER.info(String.format(req));
+		System.out.println("\n");
 		clientData.writeLock();
 		try {
 			request = Request.parse(req);
-		} catch (java.text.ParseException e) {
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -179,7 +187,7 @@ public class Server {
 	public void receiveGrant(@QueryParam(value = "id") String id) {
 		ClientUID uid = paramToUID(id);
 		ClientData clientData = localClients.get(uid);
-		
+
 		clientData.writeLockPermissions(); // Between Lock and unlock is thread safe. Atomic operation
 
 		// Adds one unit to number of permissions the current client needs from other
@@ -271,8 +279,8 @@ public class Server {
 	private void enterCriticalSection(ClientData clientData) {
 		// TODO Auto-generated method stub
 		clientData.writeLock();
-		clientData.setStateThreadUnsafe(CriticalSectionState.BUSY);
-		clientData.increaseLamportClockThreadUnsafe();
+			clientData.setStateThreadUnsafe(CriticalSectionState.BUSY);
+			clientData.increaseLamportClockThreadUnsafe();
 		clientData.writeUnlock();
 	}
 
@@ -292,7 +300,7 @@ public class Server {
 		// TODO Auto-generated method stub
 		RestHandler connection;
 
-		connection = new RestHandler(String.format("http://localhost:8080/RicardAgrawala", "localhost"));
+		connection = new RestHandler(String.format("http://192.168.1.136:8080/RicartAgrawala", "192.168.1.136"));
 		for (ClientUID localClient : localClients.keySet()) {
 			if (localClient.equals(uid)) {
 				continue;
@@ -307,10 +315,13 @@ public class Server {
 	private Request updateStateAndTimestamp(ClientUID uid, ClientData clientData) {
 		// TODO Auto-generated method stub
 		clientData.writeLock();
-		clientData.setStateThreadUnsafe(CriticalSectionState.REQUESTING);
-		LamportTime time = clientData.getLamportClockThreadUnsafe().getTime();
-		clientData.setRequestAccessTimestamp(time);
+		
+			clientData.setStateThreadUnsafe(CriticalSectionState.REQUESTING);
+			LamportTime time = clientData.getLamportClockThreadUnsafe().getTime();
+			clientData.setRequestAccessTimestamp(time);
+			
 		clientData.writeUnlock();
+		
 		return new Request(time, uid);
 	}
 

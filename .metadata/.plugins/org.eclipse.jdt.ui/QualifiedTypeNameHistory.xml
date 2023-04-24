@@ -28,7 +28,6 @@
     <fullyQualifiedTypeName name="javax.ws.rs.Produces"/>
     <fullyQualifiedTypeName name="javax.ws.rs.POST"/>
     <fullyQualifiedTypeName name="javax.ws.rs.Consumes"/>
-    <fullyQualifiedTypeName name="java.text.ParseException"/>
     <fullyQualifiedTypeName name="java.io.OutputStream"/>
     <fullyQualifiedTypeName name="utils.RestHandler"/>
     <fullyQualifiedTypeName name="javax.ws.rs.core.MediaType"/>
@@ -59,4 +58,5 @@
     <fullyQualifiedTypeName name="java.nio.file.LinkOption"/>
     <fullyQualifiedTypeName name="java.nio.file.Paths"/>
     <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
+    <fullyQualifiedTypeName name="java.text.ParseException"/>
 </qualifiedTypeNameHistroy>
