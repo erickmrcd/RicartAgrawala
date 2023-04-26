@@ -103,6 +103,7 @@ public class Main {
 				ip = numNodo[0];
 				restHandler.callWebServiceResponse("/rest/setup_remote", new RESTParameter[] {
 						new RESTParameter("ip", ip), new RESTParameter("numClients", numNodo[1]) });
+				
 				restHandler.callWebServiceResponse("/rest/setup_remote", new RESTParameter[] {
 						new RESTParameter("ip", ip), new RESTParameter("numClients", numNodo[2]) });
 				// Check response

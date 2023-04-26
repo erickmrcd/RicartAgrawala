@@ -320,7 +320,20 @@ public class Server {
 		// TODO Auto-generated method stub
 		RestHandler connection;
 
-		connection = new RestHandler(String.format("http://192.168.1.136:8080/RicartAgrawala", "192.168.1.136"));
+		for (String ipAddress : remoteClients.keySet()) {
+			connection =  new RestHandler(String.format("http://%s:8080/RicartAgrawala", ipAddress));
+			for (ClientUID client : remoteClients.get(ipAddress)) {
+				connection.callWebService(MediaType.TEXT_PLAIN,
+						"/rest/receive_request",
+						new RESTParameter[] {
+								new RESTParameter("id", client.toUniqueFilename()),
+								new RESTParameter("request", request.toString())
+						}
+				);
+			}
+		}
+		
+		connection = new RestHandler(String.format("http://%s:8080/RicartAgrawala", "localhost"));
 		for (ClientUID localClient : localClients.keySet()) {
 			if (localClient.equals(uid)) {
 				continue;
