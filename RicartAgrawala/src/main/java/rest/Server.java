@@ -33,8 +33,9 @@ public class Server {
 	private static int numTotalClients = -1;
 	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private static Map<ClientUID, ClientData> localClients;
-
+	private static Map<String, List<ClientUID>> remoteClients = new HashMap<>();
 	private static CyclicBarrier startClientBarrier = null;
+	
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
@@ -58,6 +59,25 @@ public class Server {
 		numTotalClients = Integer.parseInt(totalNumClients);
 		return Response.status(Response.Status.OK).entity(String.format("SUCCESS: New configuration set in server"))
 				.build();
+	}
+	
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Path("/setup_remote")
+	public Response setupRemoteClients(@QueryParam(value="ip")String ip,
+			                           @QueryParam(value="numClients")String numC) {
+		List<ClientUID> c = new ArrayList<>();
+		int numClients = Integer.parseInt(numC);
+		
+		for (int i = 0; i < numClients; i++){
+			c.add(new ClientUID(ip, i));
+		}
+		
+		remoteClients.put(ip, c);
+		
+		return Response.status(Response.Status.OK)
+				.entity(String.format("SUCCESS: Registered clients from node %s", ip)).build();
 	}
 
 	@GET
@@ -263,7 +283,7 @@ public class Server {
 	private void answerClient(ClientUID clientId) {
 		// TODO Auto-generated method stub
 		RestHandler connectionHandler = new RestHandler(
-				String.format("http://192.168.1.136:8080/RicartAgrawala", clientId.getIpAddress()));
+				String.format("http://%s:8080/RicartAgrawala", clientId.getIpAddress()));
 		connectionHandler.callWebService(MediaType.TEXT_PLAIN, "/rest/receive_grant",
 				new RESTParameter("id", clientId.toUniqueFilename()));
 

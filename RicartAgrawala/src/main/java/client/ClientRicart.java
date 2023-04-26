@@ -24,24 +24,24 @@ public class ClientRicart extends Thread {
 	private Random random;
 
 	private ClientUID clientID;
+	private String serverURI;
+	private String supervisorURI;
 	private RestHandler restHandler;
+	private RestHandler supervisorHandler;
+	private int numeroNodo;
 	private StringBuffer stringLog = new StringBuffer();
 	/**
 	 * @param clientID
 	 */
-	public ClientRicart(ClientUID clientID) {
+	public ClientRicart(ClientUID clientID, int numeroNodo, String serverURI,String supervisorURI) {
 		this.clientID = clientID;
 		this.random = new Random();
-		this.restHandler = new RestHandler("http://192.168.1.136:8080/RicartAgrawala");
+		this.restHandler = new RestHandler(serverURI);
+		this.supervisorHandler = new RestHandler(supervisorURI);
+		this.setNumeroNodo(numeroNodo);
 		
 	}
 
-	public ClientRicart(ClientUID clientUID, Semaphore permissionsLock) {
-		this.clientID = clientUID;
-		this.s1 = permissionsLock;
-		this.random = new Random();
-
-	}
 
 	/**
 	 * @return the clientID
@@ -53,7 +53,7 @@ public class ClientRicart extends Thread {
 	public void run() {
 		int value = -1;
 		if (null == this.restHandler) {
-			this.restHandler = new RestHandler("http://192.168.1.136:8080/RicartAgrawala");
+			this.restHandler = new RestHandler(this.getServerURI());
 		}
 		value = registerClient();
 		if (Utils.FAILURE_VALUE == value){
@@ -103,6 +103,7 @@ public class ClientRicart extends Thread {
 			LOGGER.warning(String.format("Error ocurred while sending logs in Client %d", this.getClientID()));
 			System.exit(0);
 		}
+		waitSynchronize();
 	}
 	
 	private int clientsStart() {
@@ -135,9 +136,9 @@ public class ClientRicart extends Thread {
 
 	private int sendLog(String logfile) {
 		LOGGER.info(String.format("[Process %d] Waiting for supervisor to synchronize...", clientID.getClientID()));
-		RestHandler restHandler2 = new RestHandler("http://192.168.1.136:8081/RicartAgrawala");
+		//RestHandler restHandler2 = new RestHandler("http://192.168.1.136:8081/RicartAgrawala");
 		// Send request to supervisor server with the log
-		Response response = restHandler2.postFile("/supervisor/inform", logfile);
+		Response response = supervisorHandler.postFile("/supervisor/inform", logfile);
 		
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){
@@ -220,6 +221,32 @@ public class ClientRicart extends Thread {
 	}
 	
 	private void writeLog(String action) {
-		stringLog.append(Logging.logMessage(this.getClientID(), action));
+		stringLog.append(Logging.logMessage(this.getNumeroNodo(), action));
+	}
+
+	public String getServerURI() {
+		return serverURI;
+	}
+
+	public void setServerURI(String serverURI) {
+		this.serverURI = serverURI;
+	}
+
+	public String getSupervisorURI() {
+		return supervisorURI;
+	}
+
+	public void setSupervisorURI(String supervisorURI) {
+		this.supervisorURI = supervisorURI;
+	}
+
+
+	public int getNumeroNodo() {
+		return numeroNodo;
+	}
+
+
+	public void setNumeroNodo(int numeroNodo) {
+		this.numeroNodo = numeroNodo;
 	}
 }

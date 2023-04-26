@@ -8,7 +8,7 @@ public class ClientUIDGen {
 	 * @param iP_ADDRESS
 	 */
 	public ClientUIDGen(String iP_ADDRESS) {
-		IP_ADDRESS = iP_ADDRESS;
+		this.IP_ADDRESS = iP_ADDRESS;
 	}
 	
 	public ClientUID nextGUID() {

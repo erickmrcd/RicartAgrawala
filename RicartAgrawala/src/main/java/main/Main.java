@@ -1,5 +1,6 @@
 package main;
 
+import java.util.Scanner;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import client.ClientRicart;
@@ -11,20 +12,41 @@ import utils.RESTParameter;
 public class Main {
 	private static final int NUM_PROCESOS = 2;
 
-	private static final String RESET_ENDPOINT = "/rest/reset";
 	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
-	private static final String DEFAULT_WEB_SERVICE_URI_FORMAT = "http://192.168.1.136:8080/RicartAgrawala";
+	// private static final String DEFAULT_WEB_SERVICE_URI_FORMAT =
+	// "http://192.168.1.136:8080/RicartAgrawala";
 	private static ClientRicart[] clients = new ClientRicart[NUM_PROCESOS];
 	private static String webServiceURI = "";
+	private static String supervisorURI = "";
 	private static ClientUIDGen guidGenerator = null;
 	private static RestHandler restHandler = null;
+	private static int numTotalClients = NUM_PROCESOS;
+	private static String[] remoteNodes = null;
+
+	// private static String[] remoteNodes = null;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
-		guidGenerator = new ClientUIDGen("192.168.1.136");
-		webServiceURI = DEFAULT_WEB_SERVICE_URI_FORMAT;
+		if (args.length < 3)
+			System.exit(0);
+
+		guidGenerator = new ClientUIDGen(args[0]);
+		webServiceURI = "http://" + args[0] + ":8080/RicartAgrawala";
+		setSupervisorURI("http://" + args[1] + ":8081/RicartAgrawala");
 		restHandler = new RestHandler(webServiceURI);
+		String[] numNodo = args[2].split(";");
+		if (args.length == 4) {
+			if (args[3].contains("#"))
+				remoteNodes = args[3].split("#");
+			else {
+				remoteNodes[0] = args[3];
+			}
+			if (remoteNodes == null) {
+				setNumTotalClients(NUM_PROCESOS);
+			} else {
+				setNumTotalClients(getNumTotalClients() + remoteNodes.length * 2);
+			}
+		}
 		int value;
 		value = setupServer();
 		if (Utils.FAILURE_VALUE == value) {
@@ -37,56 +59,67 @@ public class Main {
 			System.exit(0);
 		}
 		LOGGER.info(String.format("Server was restarted"));
-
-		for (int id = 0; id < NUM_PROCESOS; id++) {
-			clients[id] = new ClientRicart(guidGenerator.nextGUID());
-			
+		int i = 0;
+		for (String s : numNodo) {
+			clients[i] = new ClientRicart(guidGenerator.nextGUID(), Integer.parseInt(s), webServiceURI,
+					getSupervisorURI());
+			clients[i].setServerURI(webServiceURI);
+			clients[i].setSupervisorURI(getSupervisorURI());
+			i++;
 		}
+
 		startExecution(clients);
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Execution of main finished. Press any key to close...");
+		scanner.nextLine();
+		scanner.close();
 	}
-	
+
 	private static int resetServer() {
-		Response response = restHandler.callWebServiceResponse(RESET_ENDPOINT);
-		if (Response.Status.OK.getStatusCode() != response.getStatus()){
+		Response response = restHandler.callWebServiceResponse("/rest/reset");
+		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
 			return Utils.FAILURE_VALUE;
-		} 
+		}
 		return Utils.SUCCESS_VALUE;
 	}
-	
+
 	private static int setupServer() {
-		// Send number of local clients and global clients				
+		// Send number of local clients and global clients
 		Response response = restHandler.callWebServiceResponse("/rest/setup_num",
-																				  new RESTParameter[] {
-																							new RESTParameter("numLocal", String.valueOf(clients.length)),
-																							new RESTParameter("numTotal", String.valueOf(clients.length))
-																				  });
+				new RESTParameter[] { new RESTParameter("numLocal", String.valueOf(clients.length)),
+						new RESTParameter("numTotal", String.valueOf(getNumTotalClients())) });
 		// Check response
-		if (Response.Status.OK.getStatusCode() != response.getStatus()){
+		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
 			LOGGER.warning(String.format("ERROR. Response status HTTP %d", response.getStatus()));
 			LOGGER.warning(response.getEntity().toString());
 			return Utils.FAILURE_VALUE;
-		} 
-		/*
-		String ip, numClients;
-		if (null != remoteNodes){
-			for (String node : remoteNodes){
-				ip = node.split(";")[0];
-				numClients = node.split(";")[1];
-				restHandler.callWebServiceResponse(SETUP_REMOTE_CLIENTS_ENDPOINT,
-															  new RESTParameter[] {
-																	  new RESTParameter("ip", ip),
-																	  new RESTParameter("numClients", numClients)
-															  });
-				
-				// Check response
-				if (Response.Status.OK.getStatusCode() != response.getStatus()){
-					return Utils.FAILURE_VALUE;
-				} 
-			}		
 		}
-		*/
+
+		String ip;
+		String[] numNodo = null;
+		if (null != remoteNodes) {
+			for (String node : remoteNodes) {
+				numNodo = node.split(";");
+				ip = numNodo[0];
+				restHandler.callWebServiceResponse("/rest/setup_remote", new RESTParameter[] {
+						new RESTParameter("ip", ip), new RESTParameter("numClients", numNodo[1]) });
+				restHandler.callWebServiceResponse("/rest/setup_remote", new RESTParameter[] {
+						new RESTParameter("ip", ip), new RESTParameter("numClients", numNodo[2]) });
+				// Check response
+				if (Response.Status.OK.getStatusCode() != response.getStatus()) {
+					LOGGER.warning(
+							String.format("[Process %s] ERROR. Response status HTTP %d", ip, response.getStatus()));
+					LOGGER.warning(String.valueOf(response.getEntity()));
+					return Utils.FAILURE_VALUE;
+				}
+
+				LOGGER.info(String.valueOf(response.getEntity()));
+			}
+		}
+
 		return Utils.SUCCESS_VALUE;
 	}
+
 	private static void startExecution(ClientRicart[] clients) {
 
 		for (ClientRicart client : clients) {
@@ -96,5 +129,21 @@ public class Main {
 			}
 			client.start();
 		}
+	}
+
+	public static String getSupervisorURI() {
+		return supervisorURI;
+	}
+
+	public static void setSupervisorURI(String supervisorURI) {
+		Main.supervisorURI = supervisorURI;
+	}
+
+	public static int getNumTotalClients() {
+		return numTotalClients;
+	}
+
+	public static void setNumTotalClients(int numTotalClients) {
+		Main.numTotalClients = numTotalClients;
 	}
 }
