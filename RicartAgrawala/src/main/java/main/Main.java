@@ -39,6 +39,7 @@ public class Main {
 			if (args[3].contains("#"))
 				remoteNodes = args[3].split("#");
 			else {
+				remoteNodes = new String[1];
 				remoteNodes[0] = args[3];
 			}
 			if (remoteNodes == null) {
@@ -102,10 +103,9 @@ public class Main {
 				numNodo = node.split(";");
 				ip = numNodo[0];
 				restHandler.callWebServiceResponse("/rest/setup_remote", new RESTParameter[] {
-						new RESTParameter("ip", ip), new RESTParameter("numClients", numNodo[1]) });
-				
-				restHandler.callWebServiceResponse("/rest/setup_remote", new RESTParameter[] {
-						new RESTParameter("ip", ip), new RESTParameter("numClients", numNodo[2]) });
+						new RESTParameter("ip", ip),
+						new RESTParameter("cliente1", numNodo[1]),
+						new RESTParameter("cliente2", numNodo[2])});
 				// Check response
 				if (Response.Status.OK.getStatusCode() != response.getStatus()) {
 					LOGGER.warning(
@@ -116,6 +116,8 @@ public class Main {
 
 				LOGGER.info(String.valueOf(response.getEntity()));
 			}
+		}else {
+			
 		}
 
 		return Utils.SUCCESS_VALUE;

@@ -69,6 +69,7 @@ public class Server {
 	public Response setup(@QueryParam(value = "num_clients") int numberOfClients) {
 		NUMBER_OF_CLIENTS_WAITING = numberOfClients;
 		LOGGER.info("Set up number of clients: " + numberOfClients);
+		System.out.println(NUMBER_OF_CLIENTS_WAITING);
 		return Response.status(200).entity("OK").build();
 	}
 
@@ -150,6 +151,6 @@ public class Server {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }

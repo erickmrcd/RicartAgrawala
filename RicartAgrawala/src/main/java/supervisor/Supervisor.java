@@ -33,13 +33,14 @@ public class Supervisor {
 	private static String ipNodo2;
 	private static String ipNodo3;
 	private static int numClientes = 0;
+	private static String supervisor;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		if (args.length > 1)
+		if (args.length < 1)
 			System.exit(0);
 
 		if (args.length == 1) {
@@ -49,24 +50,25 @@ public class Supervisor {
 
 		if (args.length == 2) {
 			setIpNodo1(args[0]);
-			setIpNodo1(args[1]);
+			setIpNodo2(args[1]);
 			numClientes = args.length*2;
 		}
 
 		if (args.length == 3) {
 			setIpNodo1(args[0]);
-			setIpNodo1(args[1]);
-			setIpNodo1(args[2]);
+			setIpNodo2(args[1]);
+			setIpNodo3(args[2]);
 			numClientes = args.length*2;
 		}
 		
-		
+		setSupervisor("http://"+getIpNodo1()+":8081/RicartAgrawala");
 		Map<ClientUID, long[]> bestEstimations = new HashMap<>();
 		Map<ClientUID, List<long[]>> estimations = new HashMap<>();
 		clients = new ArrayList<>();
+		System.out.println(numClientes);
 		for(int i=0;i < numClientes; i++) {
 			if(numClientes == 2) {
-				clients.add(new ClientUID("getIpNodo1", i));
+				clients.add(new ClientUID(getIpNodo1(), i));
 			}else if(numClientes == 4) {
 				if(i < 2) {
 					clients.add(new ClientUID(getIpNodo1(), i));
@@ -84,7 +86,8 @@ public class Supervisor {
 			}
 		}
 		
-		restHandler = new RestHandler(String.format("http://"+getIpNodo1()+":8081/RicartAgrawala", "192.168.1.136"));
+		restHandler = new RestHandler(getSupervisor());
+		//System.out.println(getSupervisor());
 		restHandler.callWebService("/supervisor/setup",
 				new RESTParameter("num_clients", String.valueOf(clients.size())));
 		try {
@@ -164,9 +167,8 @@ public class Supervisor {
 		long[] timeStamps = new long[4]; // Times t0, t1, t2 , t3
 
 		// Set WEB Uri
-		RestHandler webUtils = new RestHandler(
-				String.format("http://192.168.1.136:8080/RicartAgrawala", currentID.getIpAddress()));
-
+		RestHandler webUtils = new RestHandler("http://"+currentID.getIpAddress()+":8080/RicartAgrawala");
+		//System.out.println("http://"+currentID.getIpAddress()+":8080/RicartAgrawala");
 		// Clear the last server's data
 		offsetDelayPairs.clear();
 		for (int i = 0; i < 10; ++i) {
@@ -197,7 +199,6 @@ public class Supervisor {
 	private static long[] ntpSync(RestHandler webUtils, ClientUID clientID, boolean lastSync) {
 		String delimiter = "#";
 		long[] requestPair = new long[10];
-
 		// Send request
 		String timesString = webUtils.callWebService(MediaType.TEXT_PLAIN, "/rest/synchronize",
 				new RESTParameter[] { new RESTParameter("id", clientID.toUniqueFilename()),
@@ -266,6 +267,14 @@ public class Supervisor {
 
 	public static void setIpNodo3(String ipNodo3) {
 		Supervisor.ipNodo3 = ipNodo3;
+	}
+
+	public static String getSupervisor() {
+		return supervisor;
+	}
+
+	public static void setSupervisor(String supervisor) {
+		Supervisor.supervisor = supervisor;
 	}
 
 }

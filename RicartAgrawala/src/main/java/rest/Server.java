@@ -57,6 +57,7 @@ public class Server {
 			@QueryParam(value = "numTotal") String totalNumClients) {
 		numLocalClients = Integer.parseInt(localNumClients);
 		numTotalClients = Integer.parseInt(totalNumClients);
+		
 		return Response.status(Response.Status.OK).entity(String.format("SUCCESS: New configuration set in server"))
 				.build();
 	}
@@ -66,13 +67,14 @@ public class Server {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Path("/setup_remote")
 	public Response setupRemoteClients(@QueryParam(value="ip")String ip,
-			                           @QueryParam(value="numClients")String numC) {
-		List<ClientUID> c = new ArrayList<>();
-		int numClients = Integer.parseInt(numC);
+			                           @QueryParam(value="cliente1")String c1,
+			                           @QueryParam(value="cliente2")String c2) {
 		
-		for (int i = 0; i < numClients; i++){
-			c.add(new ClientUID(ip, i));
-		}
+		List<ClientUID> c = new ArrayList<>();
+		
+			c.add(new ClientUID(ip, Integer.parseInt(c2)));
+			c.add(new ClientUID(ip, Integer.parseInt(c1)));
+
 		
 		remoteClients.put(ip, c);
 		
@@ -176,9 +178,10 @@ public class Server {
 		ClientData clientData = localClients.get(uid);
 		Request request = null;
 		System.out.println("\n");
-		LOGGER.info(String.format(req));
+		System.out.println(req);
 		System.out.println("\n");
 		clientData.writeLock();
+		
 		try {
 			request = Request.parse(req);
 		} catch (ParseException e) {
@@ -257,9 +260,10 @@ public class Server {
 	public String synchronize(@QueryParam(value = "id") String id, @QueryParam(value = "finished") boolean finished) {
 		long receipt_time = System.currentTimeMillis();
 		String response = String.format("%d#%d", receipt_time, System.currentTimeMillis());
-
+		
 		// Reached 10th time in loop (release client from wait_synchronize state)
 		if (finished) {
+			System.out.println(id);
 			ClientData clientData = localClients.get(paramToUID(id));
 			clientData.getWaitSynchronizeSemaphore().release();
 		}
@@ -333,7 +337,7 @@ public class Server {
 			}
 		}
 		
-		connection = new RestHandler(String.format("http://%s:8080/RicartAgrawala", "localhost"));
+		connection = new RestHandler(String.format("http://"+uid.getIpAddress()+":8080/RicartAgrawala", "localhost"));
 		for (ClientUID localClient : localClients.keySet()) {
 			if (localClient.equals(uid)) {
 				continue;

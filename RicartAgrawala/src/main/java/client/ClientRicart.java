@@ -12,7 +12,7 @@ import utils.Utils;
 
 public class ClientRicart extends Thread {
 
-	private static final int DEFAULT_NUMBER_ITERATIONS = 100;
+	private static final int DEFAULT_NUMBER_ITERATIONS = 10;
 	private static final int OPERATIONS_MIN_TIME = 300;
 	private static final int OPERATIONS_MAX_TIME = 500;
 	private static final int CRITICAL_SECTION_MIN_TIME = 100;
@@ -38,7 +38,7 @@ public class ClientRicart extends Thread {
 		this.random = new Random();
 		this.restHandler = new RestHandler(serverURI);
 		this.supervisorHandler = new RestHandler(supervisorURI);
-		this.setNumeroNodo(numeroNodo);
+		this.numeroNodo = numeroNodo;
 		
 	}
 
