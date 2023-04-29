@@ -1,6 +1,5 @@
 package main;
 
-import java.util.Scanner;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import client.ClientRicart;
@@ -27,15 +26,21 @@ public class Main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		if (args.length < 3)
+		if (args.length < 3) {
+			System.out.println("No se han añadido los correspondientes argumentos (minimo 3)");
+			System.out.println("argumento 1: IP LOCAL");
+			System.out.println("argumento 2: IP Supervisor");
+			System.out.println("argumento 3: Identificador de procesos separados por ; je(0;1;...)");
+			System.out.println("argumento 4: IPs remotas y sus correspondientes identificadores (192.168.1.123;0;1#192.168.1.321;2;3)");
+			System.out.println("argumento 5: Numero de la maquina (0, 1 o 2)");
 			System.exit(0);
-
-		guidGenerator = new ClientUIDGen(args[0]);
+		}
+		
 		webServiceURI = "http://" + args[0] + ":8080/RicartAgrawala";
-		setSupervisorURI("http://" + args[1] + ":8081/RicartAgrawala");
+		setSupervisorURI("http://" + args[1] + ":8080/RicartAgrawala");
 		restHandler = new RestHandler(webServiceURI);
 		String[] numNodo = args[2].split(";");
-		if (args.length == 4) {
+		if (args.length >= 4) {
 			if (args[3].contains("#"))
 				remoteNodes = args[3].split("#");
 			else {
@@ -47,6 +52,11 @@ public class Main {
 			} else {
 				setNumTotalClients(getNumTotalClients() + remoteNodes.length * 2);
 			}
+		}
+		if(args.length == 5) {
+			guidGenerator = new ClientUIDGen(args[0],Integer.parseInt(args[4])*2);
+		}else {
+			guidGenerator = new ClientUIDGen(args[0]);
 		}
 		int value;
 		value = setupServer();
@@ -62,7 +72,7 @@ public class Main {
 		LOGGER.info(String.format("Server was restarted"));
 		int i = 0;
 		for (String s : numNodo) {
-			clients[i] = new ClientRicart(guidGenerator.nextGUID(), Integer.parseInt(s), webServiceURI,
+			clients[i] = new ClientRicart(guidGenerator.nextUID(), Integer.parseInt(s), webServiceURI,
 					getSupervisorURI());
 			clients[i].setServerURI(webServiceURI);
 			clients[i].setSupervisorURI(getSupervisorURI());
@@ -70,10 +80,7 @@ public class Main {
 		}
 
 		startExecution(clients);
-		Scanner scanner = new Scanner(System.in);
-		System.out.print("Execution of main finished. Press any key to close...");
-		scanner.nextLine();
-		scanner.close();
+
 	}
 
 	private static int resetServer() {

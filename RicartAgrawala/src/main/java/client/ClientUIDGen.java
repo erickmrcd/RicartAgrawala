@@ -3,7 +3,7 @@ package client;
 public class ClientUIDGen {
 
 	private final String IP_ADDRESS;
-	private static int nextGUID = 0;
+	private static int nextUID = 0;
 	/**
 	 * @param iP_ADDRESS
 	 */
@@ -11,9 +11,14 @@ public class ClientUIDGen {
 		this.IP_ADDRESS = iP_ADDRESS;
 	}
 	
-	public ClientUID nextGUID() {
-		ClientUID newUID = new ClientUID(IP_ADDRESS, nextGUID);
-		nextGUID += 1;
+	public ClientUIDGen(String iP_ADDRESS, int firstUID) {
+		this.IP_ADDRESS = iP_ADDRESS;
+		ClientUIDGen.nextUID = firstUID;
+	}
+
+	public ClientUID nextUID() {
+		ClientUID newUID = new ClientUID(IP_ADDRESS, nextUID);
+		nextUID += 1;
 		return newUID;
 	}
 	

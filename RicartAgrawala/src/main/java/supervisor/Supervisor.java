@@ -45,49 +45,49 @@ public class Supervisor {
 
 		if (args.length == 1) {
 			setIpNodo1(args[0]);
-			numClientes = args.length*2;
+			numClientes = args.length * 2;
 		}
 
 		if (args.length == 2) {
 			setIpNodo1(args[0]);
 			setIpNodo2(args[1]);
-			numClientes = args.length*2;
+			numClientes = args.length * 2;
 		}
 
 		if (args.length == 3) {
 			setIpNodo1(args[0]);
 			setIpNodo2(args[1]);
 			setIpNodo3(args[2]);
-			numClientes = args.length*2;
+			numClientes = args.length * 2;
 		}
-		
-		setSupervisor("http://"+getIpNodo1()+":8081/RicartAgrawala");
+
+		setSupervisor("http://" + getIpNodo1() + ":8080/RicartAgrawala");
 		Map<ClientUID, long[]> bestEstimations = new HashMap<>();
 		Map<ClientUID, List<long[]>> estimations = new HashMap<>();
 		clients = new ArrayList<>();
 		System.out.println(numClientes);
-		for(int i=0;i < numClientes; i++) {
-			if(numClientes == 2) {
+		for (int i = 0; i < numClientes; i++) {
+			if (numClientes == 2) {
 				clients.add(new ClientUID(getIpNodo1(), i));
-			}else if(numClientes == 4) {
-				if(i < 2) {
+			} else if (numClientes == 4) {
+				if (i < 2) {
 					clients.add(new ClientUID(getIpNodo1(), i));
-				}else {
+				} else {
 					clients.add(new ClientUID(getIpNodo2(), i));
 				}
-			}else {
-				if(i < 2) {
+			} else {
+				if (i < 2) {
 					clients.add(new ClientUID(getIpNodo1(), i));
-				}else if(i >= 2 && i< 4) {
+				} else if (i >= 2 && i < 4) {
 					clients.add(new ClientUID(getIpNodo2(), i));
-				}else {
+				} else {
 					clients.add(new ClientUID(getIpNodo3(), i));
 				}
 			}
 		}
-		
+
 		restHandler = new RestHandler(getSupervisor());
-		//System.out.println(getSupervisor());
+		// System.out.println(getSupervisor());
 		restHandler.callWebService("/supervisor/setup",
 				new RESTParameter("num_clients", String.valueOf(clients.size())));
 		try {
@@ -100,15 +100,6 @@ public class Supervisor {
 		String s = restHandler.callWebService(MediaType.TEXT_PLAIN, "/supervisor/collect_logs");
 		logFilenames = Arrays.asList(s.split(";"));
 		System.out.println("Collected log files.");
-
-		for (ClientUID currentUID : clients) {
-			bestEstimations.put(currentUID, marzullo(estimations.get(currentUID)));
-		}
-
-		for (String filename : logFilenames) {
-			long[] offsetBounds = bestEstimations.get(ClientUID.fromUniqueFilename(filename));
-			Logging.normalizeLog(filename, offsetBounds);
-		}
 
 		try {
 			runEstimations(clients, estimations);
@@ -167,8 +158,8 @@ public class Supervisor {
 		long[] timeStamps = new long[4]; // Times t0, t1, t2 , t3
 
 		// Set WEB Uri
-		RestHandler webUtils = new RestHandler("http://"+currentID.getIpAddress()+":8080/RicartAgrawala");
-		//System.out.println("http://"+currentID.getIpAddress()+":8080/RicartAgrawala");
+		RestHandler webUtils = new RestHandler("http://" + currentID.getIpAddress() + ":8080/RicartAgrawala");
+		// System.out.println("http://"+currentID.getIpAddress()+":8080/RicartAgrawala");
 		// Clear the last server's data
 		offsetDelayPairs.clear();
 		for (int i = 0; i < 10; ++i) {
