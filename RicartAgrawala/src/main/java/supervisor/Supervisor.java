@@ -40,8 +40,14 @@ public class Supervisor {
 	 */
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		if (args.length < 1)
+		if (args.length < 1) {
+			System.out.println("No se han añadido los correspondientes argumentos (minimo 3)");
+			System.out.println("argumento 1: IP LOCAL que es la misma de donde se lanzara el primer cliente");
+			System.out.println("argumento 2: IP segundo equipo");
+			System.out.println("argumento 3: IP Tercer equipo");
 			System.exit(0);
+		}
+			
 
 		if (args.length == 1) {
 			setIpNodo1(args[0]);

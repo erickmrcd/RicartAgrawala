@@ -12,7 +12,7 @@ import utils.Utils;
 
 public class ClientRicart extends Thread {
 
-	private static final int DEFAULT_NUMBER_ITERATIONS = 10;
+	private static final int DEFAULT_NUMBER_ITERATIONS = 100;
 	private static final int OPERATIONS_MIN_TIME = 300;
 	private static final int OPERATIONS_MAX_TIME = 500;
 	private static final int CRITICAL_SECTION_MIN_TIME = 100;
@@ -30,8 +30,13 @@ public class ClientRicart extends Thread {
 	private RestHandler supervisorHandler;
 	private int numeroNodo;
 	private StringBuffer stringLog = new StringBuffer();
+	
 	/**
+	 * 
 	 * @param clientID
+	 * @param numeroNodo
+	 * @param serverURI
+	 * @param supervisorURI
 	 */
 	public ClientRicart(ClientUID clientID, int numeroNodo, String serverURI,String supervisorURI) {
 		this.clientID = clientID;
@@ -71,23 +76,15 @@ public class ClientRicart extends Thread {
 			System.exit(0);
 		}
 		for (int i = 0; i < DEFAULT_NUMBER_ITERATIONS; i++) {
-
-			// Simulating operations in between 0.3 and 0.5 seconds
-
 			simulateOperations();
-
-			// Try to enter Critical Section
 			value = enterCriticalSection();
-			/*if (Utils.FAILURE_VALUE == value){
+			if (Utils.FAILURE_VALUE == value){
 				LOGGER.warning(String.format("Client '%d' entrance to the CS failed", this.getClientID()));
 				System.exit(0);
-			}*/
-			
+			}
 			writeLog("Enter");
-			// Stay in critical section
 			criticalSection();
 			writeLog("exit");
-			// Exit critical section and grant access to other clients
 			value = exitCriticalSection();
 			if (Utils.FAILURE_VALUE == value){
 				LOGGER.warning(String.format("Client '%d' entrance from the CS failed", this.getClientID()));
@@ -120,7 +117,7 @@ public class ClientRicart extends Thread {
 	}
 	
 	private int waitSynchronize() {
-		LOGGER.info(String.format("[Process %d] Waiting for supervisor to synchronize...", clientID.getClientID()));
+		System.out.printf("%d me quedo a la espera de que inicie el supervisor\n", clientID.getClientID());
 		Response response = restHandler.callWebServiceResponse("/rest/wait_synchronize",
 													new RESTParameter("id", clientID.toUniqueFilename()));
 		
@@ -135,9 +132,7 @@ public class ClientRicart extends Thread {
 	}
 
 	private int sendLog(String logfile) {
-		LOGGER.info(String.format("[Process %d] Waiting for supervisor to synchronize...", clientID.getClientID()));
-		//RestHandler restHandler2 = new RestHandler("http://192.168.1.136:8081/RicartAgrawala");
-		// Send request to supervisor server with the log
+		System.out.printf("%d envio los logs al supervisor\n", clientID.getClientID());
 		Response response = supervisorHandler.postFile("/supervisor/inform", logfile);
 		
 		// Check response
@@ -154,7 +149,7 @@ public class ClientRicart extends Thread {
 
 	private void simulateOperations() {
 		// TODO Auto-generated method stub
-		System.out.printf("%d Hago cosas\n", getClientID());
+		System.out.printf("%d Simulo operaciones\n", getClientID());
 		
 		try {
 			Thread.sleep(Math
@@ -167,8 +162,7 @@ public class ClientRicart extends Thread {
 	}
 
 	private int enterCriticalSection() {
-		LOGGER.info(String.format("[Process %d] Trying to enter critical section", this.clientID.getClientID()));
-		//System.out.printf("%d pido entrar en seccion critica\n", getClientID());
+		System.out.printf("%d Quiero entrar en la seccion critica\n", getClientID());
 		Response response = restHandler.callWebServiceResponse("/rest/send_request",
 				new RESTParameter("id", clientID.toUniqueFilename()));
 		
@@ -186,7 +180,6 @@ public class ClientRicart extends Thread {
 	private void criticalSection() {
 		System.out.printf("%d Entre en la seccion critica\n", getClientID());
 		try {
-			// s1.acquire();
 			Thread.sleep(Math.abs(random.nextInt() % (CRITICAL_SECTION_MAX_TIME - CRITICAL_SECTION_MIN_TIME + 1)
 					+ CRITICAL_SECTION_MIN_TIME));
 		} catch (InterruptedException e) {
@@ -196,7 +189,6 @@ public class ClientRicart extends Thread {
 
 	private int exitCriticalSection() {
 		System.out.printf("%d sali seccion critica\n", getClientID());
-		// s1.release();
 		Response response = restHandler.callWebServiceResponse("/rest/exit",
 				new RESTParameter("id", clientID.toUniqueFilename()));
 		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
