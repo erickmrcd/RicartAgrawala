@@ -1,13 +1,13 @@
 package utils;
 
-public class RESTParameter {
+public class RestParameter {
 	private String name;
 	private String value;
 	/**
 	 * @param name
 	 * @param value
 	 */
-	public RESTParameter(String name, String value) {
+	public RestParameter(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}

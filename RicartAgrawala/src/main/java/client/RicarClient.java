@@ -5,12 +5,12 @@ import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 
-import logging.Logging;
-import utils.RESTParameter;
+import logging.Logs;
+import utils.RestParameter;
 import utils.RestHandler;
-import utils.Utils;
+import utils.ResponseCodes;
 
-public class ClientRicart extends Thread {
+public class RicarClient extends Thread {
 
 	private static final int DEFAULT_NUMBER_ITERATIONS = 100;
 	private static final int OPERATIONS_MIN_TIME = 300;
@@ -18,12 +18,12 @@ public class ClientRicart extends Thread {
 	private static final int CRITICAL_SECTION_MIN_TIME = 100;
 	private static final int CRITICAL_SECTION_MAX_TIME = 300;
 	
-	private static final Logger LOGGER = Logger.getLogger(ClientRicart.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(RicarClient.class.getName());
 	public Semaphore s1;
 
 	private Random random;
 
-	private ClientUID clientID;
+	private ClientIdentifier clientID;
 	private String serverURI;
 	private String supervisorURI;
 	private RestHandler restHandler;
@@ -38,7 +38,7 @@ public class ClientRicart extends Thread {
 	 * @param serverURI
 	 * @param supervisorURI
 	 */
-	public ClientRicart(ClientUID clientID, int numeroNodo, String serverURI,String supervisorURI) {
+	public RicarClient(ClientIdentifier clientID, int numeroNodo, String serverURI,String supervisorURI) {
 		this.clientID = clientID;
 		this.random = new Random();
 		this.restHandler = new RestHandler(serverURI);
@@ -61,24 +61,24 @@ public class ClientRicart extends Thread {
 			this.restHandler = new RestHandler(this.getServerURI());
 		}
 		value = registerClient();
-		if (Utils.FAILURE_VALUE == value){
+		if (ResponseCodes.FAILURE_VALUE == value){
 			LOGGER.warning(String.format("Client '%d' registery failed", this.getClientID()));
 			System.exit(0);
 		}
 		value = waitSynchronize();
-		if (Utils.FAILURE_VALUE == value){
+		if (ResponseCodes.FAILURE_VALUE == value){
 			LOGGER.warning(String.format("Client '%d' synchronization failed", this.getClientID()));
 			System.exit(0);
 		}
 		value = clientsStart();
-		if (Utils.FAILURE_VALUE == value){
+		if (ResponseCodes.FAILURE_VALUE == value){
 			LOGGER.warning(String.format("Client '%d' start failed", this.getClientID()));
 			System.exit(0);
 		}
 		for (int i = 0; i < DEFAULT_NUMBER_ITERATIONS; i++) {
 			simulateOperations();
 			value = enterCriticalSection();
-			if (Utils.FAILURE_VALUE == value){
+			if (ResponseCodes.FAILURE_VALUE == value){
 				LOGGER.warning(String.format("Client '%d' entrance to the CS failed", this.getClientID()));
 				System.exit(0);
 			}
@@ -86,17 +86,17 @@ public class ClientRicart extends Thread {
 			criticalSection();
 			writeLog("exit");
 			value = exitCriticalSection();
-			if (Utils.FAILURE_VALUE == value){
+			if (ResponseCodes.FAILURE_VALUE == value){
 				LOGGER.warning(String.format("Client '%d' entrance from the CS failed", this.getClientID()));
 				System.exit(0);
 			}
 
 		}
 		
-		Logging.doLog(this.clientID, stringLog.toString());
+		Logs.doLog(this.clientID, stringLog.toString());
 		// Send client�s log to supervisor
 		value = sendLog(clientID.toUniqueFilename("log"));
-		if (Utils.FAILURE_VALUE == value){
+		if (ResponseCodes.FAILURE_VALUE == value){
 			LOGGER.warning(String.format("Error ocurred while sending logs in Client %d", this.getClientID()));
 			System.exit(0);
 		}
@@ -110,25 +110,25 @@ public class ClientRicart extends Thread {
 		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
 			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
 			LOGGER.warning(String.valueOf(response.getEntity()));
-			return Utils.FAILURE_VALUE;
+			return ResponseCodes.FAILURE_VALUE;
 		}
 		LOGGER.info(String.valueOf(response.getEntity()));
-		return Utils.SUCCESS_VALUE;
+		return ResponseCodes.SUCCESS_VALUE;
 	}
 	
 	private int waitSynchronize() {
 		System.out.printf("%d me quedo a la espera de que inicie el supervisor\n", clientID.getClientID());
 		Response response = restHandler.callWebServiceResponse("/rest/wait_synchronize",
-													new RESTParameter("id", clientID.toUniqueFilename()));
+													new RestParameter("id", clientID.toUniqueIdentifier()));
 		
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){
 			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
 			LOGGER.warning(String.valueOf(response.getEntity()));
-			return Utils.FAILURE_VALUE;
+			return ResponseCodes.FAILURE_VALUE;
 		} 
 		LOGGER.info(String.valueOf(response.getEntity()));
-		return Utils.SUCCESS_VALUE;
+		return ResponseCodes.SUCCESS_VALUE;
 	}
 
 	private int sendLog(String logfile) {
@@ -139,11 +139,11 @@ public class ClientRicart extends Thread {
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){
 			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
 			LOGGER.warning(String.valueOf(response.getEntity()));
-			return Utils.FAILURE_VALUE;
+			return ResponseCodes.FAILURE_VALUE;
 		} 
 		
 		LOGGER.info(String.valueOf(response.getEntity()));
-		return Utils.SUCCESS_VALUE;
+		return ResponseCodes.SUCCESS_VALUE;
 
 	}
 
@@ -153,8 +153,8 @@ public class ClientRicart extends Thread {
 		
 		try {
 			Thread.sleep(Math
-					.abs(random.nextInt() % (ClientRicart.OPERATIONS_MAX_TIME - ClientRicart.OPERATIONS_MIN_TIME + 1)
-							+ ClientRicart.OPERATIONS_MIN_TIME));
+					.abs(random.nextInt() % (RicarClient.OPERATIONS_MAX_TIME - RicarClient.OPERATIONS_MIN_TIME + 1)
+							+ RicarClient.OPERATIONS_MIN_TIME));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -164,16 +164,16 @@ public class ClientRicart extends Thread {
 	private int enterCriticalSection() {
 		System.out.printf("%d Quiero entrar en la seccion critica\n", getClientID());
 		Response response = restHandler.callWebServiceResponse("/rest/send_request",
-				new RESTParameter("id", clientID.toUniqueFilename()));
+				new RestParameter("id", clientID.toUniqueIdentifier()));
 		
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
 			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
 			LOGGER.warning(String.valueOf(response.getEntity()));
-			return Utils.FAILURE_VALUE;
+			return ResponseCodes.FAILURE_VALUE;
 		}
 		LOGGER.info(String.valueOf(response.getEntity()));
-		return Utils.SUCCESS_VALUE;
+		return ResponseCodes.SUCCESS_VALUE;
 
 	}
 
@@ -190,30 +190,32 @@ public class ClientRicart extends Thread {
 	private int exitCriticalSection() {
 		System.out.printf("%d sali seccion critica\n", getClientID());
 		Response response = restHandler.callWebServiceResponse("/rest/exit",
-				new RESTParameter("id", clientID.toUniqueFilename()));
+				new RestParameter("id", clientID.toUniqueIdentifier()));
 		if (Response.Status.OK.getStatusCode() != response.getStatus()) {
-			return Utils.FAILURE_VALUE;
+			return ResponseCodes.FAILURE_VALUE;
 		}
-		return Utils.SUCCESS_VALUE;
+		return ResponseCodes.SUCCESS_VALUE;
 	}
 	
 	private int registerClient() {	
 		// Send request to server
 		Response response = restHandler.callWebServiceResponse("/rest/registrar",
-				                                                new RESTParameter("id", clientID.toUniqueFilename()));
+				                                                new RestParameter("id", clientID.toUniqueIdentifier()));
 		
 		// Check response
 		if (Response.Status.OK.getStatusCode() != response.getStatus()){
 			LOGGER.warning(String.format("[Process %d] ERROR. Response status HTTP %d", clientID.getClientID(), response.getStatus()));
 			LOGGER.warning(String.valueOf(response.getEntity()));
-			return Utils.FAILURE_VALUE;
+			return ResponseCodes.FAILURE_VALUE;
 		} 
 		
-		return Utils.SUCCESS_VALUE;
+		return ResponseCodes.SUCCESS_VALUE;
 	}
 	
+	
+	
 	private void writeLog(String action) {
-		stringLog.append(Logging.logMessage(this.getNumeroNodo(), action));
+		stringLog.append(Logs.logMessage(this.getNumeroNodo(), action));
 	}
 
 	public String getServerURI() {

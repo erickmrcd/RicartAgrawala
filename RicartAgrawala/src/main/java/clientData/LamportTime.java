@@ -1,62 +1,39 @@
 package clientData;
 
 public class LamportTime implements Comparable<LamportTime> {
-	
-	/**
-	 * Value of timestamp
-	 */
+
 	private long value; 
 
-	/**
-	 * Constructor of the class
-	 * 
-	 * @param value     value of the timestamp
-	 */
 	public LamportTime(long value) {
 		this.value = value;
 	}
-	
-	/**
-	 * @param value      new value of the timestamp
-	 */
+
 	public LamportTime(int value) {
 		this.value = (long) value;
 	}
 
-	/**
-	 * @return the value
-	 */
 	public long getValue() {
 		return value;
 	}
-	
-	/**
-	 * Adds new value to the current one
-	 * 
-	 * @param value      new value to add
-	 */
+
 	public void add(long value) {
 		this.value += value;
 	}
-	
-	/**
-	 * @return the value
-	 */
+
 	public long toLong() {
 		return this.value;
 	}
+
 	
-	/**
-	 * Compares two timestamps
-	 * 
-	 * @param t1    timestamp to compare
-	 * @param t2    timestamp to compare
-	 * @return      result of comparison. -1 if t2 is greater, 0 if equals and 1 if t1 is greater
-	 */
+	
+	public static LamportTime max(LamportTime t1, LamportTime t2) {
+		return (t1.getValue() >= t2.getValue()) ? t1 : t2;  
+	}
+
 	public static int compare(LamportTime t1, LamportTime t2) {
 		return Long.compare(t1.getValue(), t2.getValue());
 	}
-
+	
 	@Override
 	public int compareTo(LamportTime other) {
 		return LamportTime.compare(this, other);
@@ -89,14 +66,5 @@ public class LamportTime implements Comparable<LamportTime> {
 		return String.valueOf(this.value);
 	}
 	
-	/**
-	 * Gets the maximum value of the two given
-	 * 
-	 * @param t1    timestamp to compare
-	 * @param t2    timestamp to compare
-	 * @return      result of comparison. -1 if t2 is greater, 0 if equals and 1 if t1 is greater
-	 */
-	public static LamportTime max(LamportTime t1, LamportTime t2) {
-		return (t1.getValue() >= t2.getValue()) ? t1 : t2;  
-	}
+	
 }

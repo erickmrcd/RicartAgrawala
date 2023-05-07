@@ -1,11 +1,11 @@
 package rest;
 
-import client.ClientUID;
-import clientData.ClientData;
-import clientData.CriticalSectionState;
+import client.ClientIdentifier;
+import clientData.RicartClientData;
+import clientData.State;
 import clientData.LamportClock;
 import clientData.LamportTime;
-import utils.RESTParameter;
+import utils.RestParameter;
 import utils.RestHandler;
 
 import java.util.List;
@@ -32,8 +32,8 @@ public class Server {
 	private static int numLocalClients = -1;
 	private static int numTotalClients = -1;
 	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	private static Map<ClientUID, ClientData> localClients;
-	private static Map<String, List<ClientUID>> remoteClients = new HashMap<>();
+	private static Map<ClientIdentifier, RicartClientData> localClients;
+	private static Map<String, List<ClientIdentifier>> remoteClients = new HashMap<>();
 	private static CyclicBarrier startClientBarrier = null;
 	
 
@@ -42,7 +42,7 @@ public class Server {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Path("/reset")
 	public Response resetServer() {
-		localClients = new HashMap<ClientUID, ClientData>();
+		localClients = new HashMap<ClientIdentifier, RicartClientData>();
 		localClients.clear();
 		startClientBarrier = new CyclicBarrier(numLocalClients);
 
@@ -52,8 +52,8 @@ public class Server {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
-	@Path("/setup_num")
-	public Response setupNumClients(@QueryParam(value = "numLocal") String localNumClients,
+	@Path("/setup_local")
+	public Response setupLocal(@QueryParam(value = "numLocal") String localNumClients,
 			@QueryParam(value = "numTotal") String totalNumClients) {
 		numLocalClients = Integer.parseInt(localNumClients);
 		numTotalClients = Integer.parseInt(totalNumClients);
@@ -66,14 +66,14 @@ public class Server {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Path("/setup_remote")
-	public Response setupRemoteClients(@QueryParam(value="ip")String ip,
+	public Response setupRemote(@QueryParam(value="ip")String ip,
 			                           @QueryParam(value="cliente1")String c1,
 			                           @QueryParam(value="cliente2")String c2) {
 		
-		List<ClientUID> c = new ArrayList<>();
+		List<ClientIdentifier> c = new ArrayList<>();
 		
-			c.add(new ClientUID(ip, Integer.parseInt(c2)));
-			c.add(new ClientUID(ip, Integer.parseInt(c1)));
+			c.add(new ClientIdentifier(ip, Integer.parseInt(c2)));
+			c.add(new ClientIdentifier(ip, Integer.parseInt(c1)));
 
 		
 		remoteClients.put(ip, c);
@@ -104,7 +104,7 @@ public class Server {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Path("/registrar")
 	public Response registrar(@QueryParam(value = "id") String id) {
-		ClientUID uid = paramToUID(id);
+		ClientIdentifier uid = parameterToIdentifier(id);
 
 		// Avoid registering duplicates
 		if (localClients.containsKey(uid)) {
@@ -114,7 +114,7 @@ public class Server {
 		}
 
 		// Add client to map registry
-		localClients.put(uid, new ClientData());
+		localClients.put(uid, new RicartClientData());
 
 		return Response.status(Response.Status.OK)
 				.entity(String.format("SUCCESS: Registered process %s with GUID %d", id, uid.getClientID())).build();
@@ -127,7 +127,7 @@ public class Server {
 	public Response waitSynchronize(@QueryParam(value = "id") String id) {
 
 		// Get requesting client information
-		ClientData clientData = localClients.get(paramToUID(id));
+		RicartClientData clientData = localClients.get(parameterToIdentifier(id));
 
 		if (null == clientData) {
 			return Response.status(Response.Status.NOT_FOUND)
@@ -150,16 +150,15 @@ public class Server {
 	public Response sendRequest(@QueryParam(value = "id") String id) {
 		System.out.println("\n\n");
 		LOGGER.info(String.format("[Client '%s'] requests access to critical section", id));
-		ClientUID uid = paramToUID(id);
-		ClientData clientData = localClients.get(uid);
-		LOGGER.info(String.format("[Client '%s'] requests access to critical section", uid.getClientID()));
+		ClientIdentifier uid = parameterToIdentifier(id);
+		RicartClientData clientData = localClients.get(uid);
 		if (null == clientData) {
 			LOGGER.info(String.format("[Client '%s'] No existe", uid.getClientID()));
 			return Response.status(Response.Status.BAD_GATEWAY)
 					.entity(String.format("ERROR: the client with client id (%d) does not exist", uid.getClientID()))
 					.build();
 		}
-		Request request = updateStateAndTimestamp(uid, clientData);
+		RestRequest request = updateStateAndTimestamp(uid, clientData);
 		LOGGER.info(String.format("[Client '%s'] Sending request to rest of clients [timestamp#uniqueFilename]: %s", id, request.toString()));
 		multicastRequest(uid, request);
 		LOGGER.info(String.format("[Client '%s'] Waiting for responses from other clients", id));
@@ -174,27 +173,24 @@ public class Server {
 	@GET
 	@Path("/receive_request")
 	public void receiveRequest(@QueryParam(value = "id") String id, @QueryParam(value = "request") String req) {
-		ClientUID uid = paramToUID(id);
-		ClientData clientData = localClients.get(uid);
-		Request request = null;
-		System.out.println("\n");
-		System.out.println(req);
-		System.out.println("\n");
+		ClientIdentifier uid = parameterToIdentifier(id);
+		RicartClientData clientData = localClients.get(uid);
+		RestRequest request = null;
 		clientData.writeLock();
 		
 		try {
-			request = Request.parse(req);
+			request = RestRequest.parse(req);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		updateLamportClock(clientData, request);
-		CriticalSectionState state = clientData.getStateThreadUnsafe();
-		Request requestToCompare = new Request(clientData.getRequestAccessTimestamp(), uid);
+		State state = clientData.getStateOfThread();
+		RestRequest requestToCompare = new RestRequest(clientData.getRequestAccessTimestamp(), uid);
 
-		if (state == CriticalSectionState.BUSY
-				|| state == CriticalSectionState.REQUESTING && Request.compare(requestToCompare, request) <= 0) {
+		if (state == State.OCUPADA
+				|| state == State.REQUERIDA && RestRequest.compare(requestToCompare, request) <= 0) {
 			clientData.addToQueueThreadUnsafe(request);
 			clientData.writeUnlock();
 		} else {
@@ -208,24 +204,13 @@ public class Server {
 	@GET
 	@Path("/receive_grant")
 	public void receiveGrant(@QueryParam(value = "id") String id) {
-		ClientUID uid = paramToUID(id);
-		ClientData clientData = localClients.get(uid);
+		ClientIdentifier uid = parameterToIdentifier(id);
+		RicartClientData clientData = localClients.get(uid);
 
-		clientData.writeLockPermissions(); // Between Lock and unlock is thread safe. Atomic operation
-
-		// Adds one unit to number of permissions the current client needs from other
-		// processes to enter the critical section
-		clientData.addPermissionThreadUnsafe();
-
-		// When all the clients have answered the current one, this notifies the
-		// structure for waiting responses to realase the thread
-		if (clientData.getPermissionsThreadUnsafe() == numTotalClients - 1) {
-
-			// Resets the number of permission for this client to 0
-			clientData.setPermissionsThreadUnsafe(0);
-
-			// Decreases the value of the CountDownLatch in one unit. When it reaches value
-			// 0 the process is liberated
+		clientData.writeLockPermissions(); 
+		clientData.addPermissionThread();
+		if (clientData.getPermissionsThread() == numTotalClients - 1) {
+			clientData.setPermissionsThread(0);
 			clientData.getWaitForResponsesStructure().countDown();
 		}
 
@@ -237,16 +222,11 @@ public class Server {
 	public Response exitCriticalSection(@QueryParam(value = "id") String id) {
 
 		// Get requesting client information
-		ClientUID uid = paramToUID(id);
-		ClientData clientData = localClients.get(uid);
+		ClientIdentifier uid = parameterToIdentifier(id);
+		RicartClientData clientData = localClients.get(uid);
+		List<RestRequest> queuedRequests = getAllRequestsFromQueue(clientData);
 
-		// Get all requests in client�s queue
-		clientData.writeLock(); // Between Lock and unlock is thread safe. Atomic operation
-		List<Request> queuedRequests = getAllRequestsFromQueue(clientData);
-
-		clientData.writeUnlock(); // Between Lock and unlock is thread safe. Atomic operation
-
-		// Answer all requests in queue
+		clientData.writeUnlock(); 
 		answerRequestsInQueue(queuedRequests);
 
 		return Response.status(Response.Status.OK)
@@ -263,53 +243,49 @@ public class Server {
 		
 		// Reached 10th time in loop (release client from wait_synchronize state)
 		if (finished) {
-			System.out.println(id);
-			ClientData clientData = localClients.get(paramToUID(id));
+			RicartClientData clientData = localClients.get(parameterToIdentifier(id));
 			clientData.getWaitSynchronizeSemaphore().release();
 		}
 
 		return response;
 	}
 
-	private void answerRequestsInQueue(List<Request> queuedRequests) {
-		// TODO Auto-generated method stub
-		for (Request request : queuedRequests) {
-			ClientUID destinationUID = request.getClientId();
+	
+	private void answerRequestsInQueue(List<RestRequest> queuedRequests) {
+		for (RestRequest request : queuedRequests) {
+			ClientIdentifier destinationUID = request.getClientId();
 			answerClient(destinationUID);
 		}
 	}
 
-	private List<Request> getAllRequestsFromQueue(ClientData clientData) {
-		clientData.setStateThreadUnsafe(CriticalSectionState.FREE);
-		return clientData.removeAllFromQueueThreadUnsafe();
-	}
+	
 
-	private void answerClient(ClientUID clientId) {
-		// TODO Auto-generated method stub
+	private void answerClient(ClientIdentifier clientId) {
 		RestHandler connectionHandler = new RestHandler(
 				String.format("http://%s:8080/RicartAgrawala", clientId.getIpAddress()));
 		connectionHandler.callWebService(MediaType.TEXT_PLAIN, "/rest/receive_grant",
-				new RESTParameter("id", clientId.toUniqueFilename()));
-
+				new RestParameter("id", clientId.toUniqueIdentifier()));
 	}
-
-	private void updateLamportClock(ClientData clientData, Request request) {
-		// TODO Auto-generated method stub
-		LamportTime maxTimestamp = LamportTime.max(clientData.getLamportClockThreadUnsafe().getTime(),
+	
+	private List<RestRequest> getAllRequestsFromQueue(RicartClientData clientData) {
+		clientData.setStateOfThread(State.LIBRE);
+		return clientData.removeAllFromQueueThreadUnsafe();
+	}
+	
+	private void updateLamportClock(RicartClientData clientData, RestRequest request) {
+		LamportTime maxTimestamp = LamportTime.max(clientData.getLamportClockThread().getTime(),
 				request.getTimestamp());
-		clientData.setLamportClockThreadUnsafe(new LamportClock(new LamportTime(maxTimestamp.getValue() + 1)));
+		clientData.setLamportClockThread(new LamportClock(new LamportTime(maxTimestamp.getValue() + 1)));
 	}
 
-	private void enterCriticalSection(ClientData clientData) {
-		// TODO Auto-generated method stub
+	private void enterCriticalSection(RicartClientData clientData) {
 		clientData.writeLock();
-			clientData.setStateThreadUnsafe(CriticalSectionState.BUSY);
-			clientData.increaseLamportClockThreadUnsafe();
+			clientData.setStateOfThread(State.OCUPADA);
+			clientData.increaseLamportClockThread();
 		clientData.writeUnlock();
 	}
 
-	private void waitResponses(String id, ClientData clientData) {
-		// TODO Auto-generated method stub
+	private void waitResponses(String id, RicartClientData clientData) {
 		try {
 			clientData.getWaitForResponsesStructure().await();
 			clientData.resetWaitForResponsesStructure();
@@ -320,53 +296,54 @@ public class Server {
 
 	}
 
-	private void multicastRequest(ClientUID uid, Request request) {
+	private void multicastRequest(ClientIdentifier uid, RestRequest request) {
 		// TODO Auto-generated method stub
 		RestHandler connection;
 
 		for (String ipAddress : remoteClients.keySet()) {
 			connection =  new RestHandler(String.format("http://%s:8080/RicartAgrawala", ipAddress));
-			for (ClientUID client : remoteClients.get(ipAddress)) {
+			for (ClientIdentifier client : remoteClients.get(ipAddress)) {
 				connection.callWebService(MediaType.TEXT_PLAIN,
 						"/rest/receive_request",
-						new RESTParameter[] {
-								new RESTParameter("id", client.toUniqueFilename()),
-								new RESTParameter("request", request.toString())
+						new RestParameter[] {
+								new RestParameter("id", client
+										.toUniqueIdentifier()),
+								new RestParameter("request", request.toString())
 						}
 				);
 			}
 		}
 		
 		connection = new RestHandler(String.format("http://"+uid.getIpAddress()+":8080/RicartAgrawala", "localhost"));
-		for (ClientUID localClient : localClients.keySet()) {
+		for (ClientIdentifier localClient : localClients.keySet()) {
 			if (localClient.equals(uid)) {
 				continue;
 			}
 			connection.callWebService(MediaType.TEXT_PLAIN, "/rest/receive_request",
-					new RESTParameter[] { new RESTParameter("id", localClient.toUniqueFilename()),
-							new RESTParameter("request", request.toString()) });
+					new RestParameter[] { new RestParameter("id", localClient.toUniqueIdentifier()),
+							new RestParameter("request", request.toString()) });
 		}
 
 	}
 
-	private Request updateStateAndTimestamp(ClientUID uid, ClientData clientData) {
+	private RestRequest updateStateAndTimestamp(ClientIdentifier uid, RicartClientData clientData) {
 		// TODO Auto-generated method stub
 		clientData.writeLock();
 		
-			clientData.setStateThreadUnsafe(CriticalSectionState.REQUESTING);
-			LamportTime time = clientData.getLamportClockThreadUnsafe().getTime();
+			clientData.setStateOfThread(State.REQUERIDA);
+			LamportTime time = clientData.getLamportClockThread().getTime();
 			clientData.setRequestAccessTimestamp(time);
 			
 		clientData.writeUnlock();
 		
-		return new Request(time, uid);
+		return new RestRequest(time, uid);
 	}
 
-	private ClientUID paramToUID(String id) {
+	private ClientIdentifier parameterToIdentifier(String id) {
 		// TODO Auto-generated method stub
-		ClientUID uid = null;
+		ClientIdentifier uid = null;
 		try {
-			uid = ClientUID.fromUniqueFilename(id);
+			uid = ClientIdentifier.fromUniqueIdentifier(id);
 		} catch (java.text.ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

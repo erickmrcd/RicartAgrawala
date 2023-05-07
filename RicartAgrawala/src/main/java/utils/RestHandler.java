@@ -45,7 +45,7 @@ public class RestHandler {
 		return defaultBaseWebTarget;
 	}
 
-	public void callWebService(String uri, RESTParameter[] parameters) {
+	public void callWebService(String uri, RestParameter[] parameters) {
 		callWebServiceReturnVoid(uri, parameters);
 	}
 
@@ -53,11 +53,11 @@ public class RestHandler {
 		callWebServiceReturnVoid(uri, null);
 	}
 
-	public void callWebService(String uri, RESTParameter parameter) {
-		callWebServiceReturnVoid(uri, new RESTParameter[] { parameter });
+	public void callWebService(String uri, RestParameter parameter) {
+		callWebServiceReturnVoid(uri, new RestParameter[] { parameter });
 	}
 
-	public Response callWebServiceResponse(String uri, RESTParameter[] parameters) {
+	public Response callWebServiceResponse(String uri, RestParameter[] parameters) {
 		return callWebServiceReturnResponse(uri, parameters);
 	}
 
@@ -65,11 +65,11 @@ public class RestHandler {
 		return callWebServiceReturnResponse(uri, null);
 	}
 
-	public Response callWebServiceResponse(String uri, RESTParameter parameter) {
-		return callWebServiceReturnResponse(uri, new RESTParameter[] { parameter });
+	public Response callWebServiceResponse(String uri, RestParameter parameter) {
+		return callWebServiceReturnResponse(uri, new RestParameter[] { parameter });
 	}
 
-	private void callWebServiceReturnVoid(String uri, RESTParameter[] parameters) {
+	private void callWebServiceReturnVoid(String uri, RestParameter[] parameters) {
 		// TODO Auto-generated method stub
 		WebTarget currentTarget = defaultBaseWebTarget;
 
@@ -81,14 +81,14 @@ public class RestHandler {
 		}
 
 		if (parameters != null) {
-			for (RESTParameter parameter : parameters) {
+			for (RestParameter parameter : parameters) {
 				currentTarget = currentTarget.queryParam(parameter.getName(), parameter.getValue());
 			}
 		}
 		currentTarget.request().get();
 	}
 
-	private Response callWebServiceReturnResponse(String uri, RESTParameter[] parameters) {
+	private Response callWebServiceReturnResponse(String uri, RestParameter[] parameters) {
 		// TODO Auto-generated method stub
 		WebTarget currentTarget = defaultBaseWebTarget;
 
@@ -100,7 +100,7 @@ public class RestHandler {
 		}
 
 		if (parameters != null) {
-			for (RESTParameter parameter : parameters) {
+			for (RestParameter parameter : parameters) {
 				currentTarget = currentTarget.queryParam(parameter.getName(), parameter.getValue());
 				// System.out.println(parameter.getValue());
 			}
@@ -126,7 +126,7 @@ public class RestHandler {
 		return uriParts.toArray(asArray);
 	}
 
-	public <T> T callWebService(String textPlain, String string, RESTParameter[] restParameters) {
+	public <T> T callWebService(String textPlain, String string, RestParameter[] restParameters) {
 		return callWebServiceReturnGeneric(textPlain, string, restParameters);
 	}
 
@@ -134,12 +134,12 @@ public class RestHandler {
 		return callWebServiceReturnGeneric(textPlain, string, null);
 	}
 
-	public <T> T callWebService(String textPlain, String string, RESTParameter parameter) {
-		return callWebServiceReturnGeneric(textPlain, string, new RESTParameter[] { parameter });
+	public <T> T callWebService(String textPlain, String string, RestParameter parameter) {
+		return callWebServiceReturnGeneric(textPlain, string, new RestParameter[] { parameter });
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T callWebServiceReturnGeneric(String textPlain, String string, RESTParameter[] restParameters) {
+	private <T> T callWebServiceReturnGeneric(String textPlain, String string, RestParameter[] restParameters) {
 		WebTarget currentTarget = defaultBaseWebTarget;
 
 		// Process uri
@@ -150,7 +150,7 @@ public class RestHandler {
 		}
 
 		if (restParameters != null) {
-			for (RESTParameter parameter : restParameters) {
+			for (RestParameter parameter : restParameters) {
 				currentTarget = currentTarget.queryParam(parameter.getName(), parameter.getValue());
 			}
 		}

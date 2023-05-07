@@ -2,13 +2,13 @@ package client;
 
 import java.text.ParseException;
 
-public class ClientUID implements Comparable<ClientUID>{
+public class ClientIdentifier implements Comparable<ClientIdentifier>{
 	
 	private String ipAddress;
 	private int clientID;
 	
 	
-	public ClientUID(String ipAddress, int id) {
+	public ClientIdentifier(String ipAddress, int id) {
 		this.ipAddress = ipAddress;
 		this.clientID = id;
 	}
@@ -43,7 +43,7 @@ public class ClientUID implements Comparable<ClientUID>{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ClientUID other = (ClientUID) obj;
+		ClientIdentifier other = (ClientIdentifier) obj;
 		if (clientID != other.clientID)
 			return false;
 		if (ipAddress == null) {
@@ -54,7 +54,7 @@ public class ClientUID implements Comparable<ClientUID>{
 		return true;
 	}
 	
-	public static int compare(ClientUID id1, ClientUID id2) {
+	public static int compare(ClientIdentifier id1, ClientIdentifier id2) {
 		int comparison = id1.getIpAddress().compareTo(id2.getIpAddress());
 		if (comparison != 0)
 			return comparison;
@@ -63,8 +63,8 @@ public class ClientUID implements Comparable<ClientUID>{
 	}
 
 	@Override
-	public int compareTo(ClientUID other) {
-		return ClientUID.compare(this, other);
+	public int compareTo(ClientIdentifier other) {
+		return ClientIdentifier.compare(this, other);
 	}
 	
 	public String toUniqueFilename(String fileExtension) {
@@ -74,11 +74,11 @@ public class ClientUID implements Comparable<ClientUID>{
 			return String.format("%s_%d", this.ipAddress, this.clientID);
 	}
 	
-	public String toUniqueFilename() {
+	public String toUniqueIdentifier() {
 		return this.toUniqueFilename(null);
 	}
 
-	public static ClientUID fromUniqueFilename(String id) throws ParseException{
+	public static ClientIdentifier fromUniqueIdentifier(String id) throws ParseException{
 		String[] parts = id.split("_");
 		if (parts.length < 2) {
 			throw new IllegalArgumentException(String.format("Filename '%s' has a bad structure", id));
@@ -89,7 +89,7 @@ public class ClientUID implements Comparable<ClientUID>{
 			throw new ParseException(String.format("Unknown format of filename '%s'", id), offset);
 		}
 		String[] rightParts = parts[1].split("\\.");  // Support for file extensions
-		return new ClientUID(parts[0], Integer.parseInt(rightParts[0]));	
+		return new ClientIdentifier(parts[0], Integer.parseInt(rightParts[0]));	
 	}
 
 }

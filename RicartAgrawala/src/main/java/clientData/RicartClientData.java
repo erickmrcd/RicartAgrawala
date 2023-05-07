@@ -7,48 +7,47 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
-import rest.Request;
+import rest.RestRequest;
 
-public class ClientData {
+public class RicartClientData {
 	private static Semaphore generalLock = new Semaphore(1);
 	private static Semaphore permissionsLock = new Semaphore(1);
 
 	private LamportTime requestAccessTimestamp;
 	private LamportClock lamportClock;
-	private Queue<Request> requestQueue;
+	private Queue<RestRequest> requestQueue;
 	private Semaphore waitSynchronizeSemaphore;
 	private int permissions;
-	private CriticalSectionState state;
+	private State state;
 	private CountDownLatch waitForResponsesStructure;
 
 	/**
 	 * 
 	 */
-	public ClientData() {
+	public RicartClientData() {
 		this.requestAccessTimestamp = new LamportTime(0);
 		this.lamportClock = new LamportClock(new LamportTime(0));
 		this.requestQueue = new LinkedList<>();
 		this.permissions = 0;
-		this.state = CriticalSectionState.FREE;
+		this.state = State.LIBRE;
 		this.waitSynchronizeSemaphore = new Semaphore(0);
 		this.waitForResponsesStructure = new CountDownLatch(1);
 	}
 
 	public void writeLock() {
 		try {
-			ClientData.generalLock.acquire();
+			RicartClientData.generalLock.acquire();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	public void writeUnlock() {
-		ClientData.generalLock.release();
+		RicartClientData.generalLock.release();
 	}
 
 	public int readLock() {
-		return ClientData.generalLock.availablePermits();
+		return RicartClientData.generalLock.availablePermits();
 	}
 
 	/**
@@ -68,28 +67,28 @@ public class ClientData {
 	/**
 	 * @param lamportClock the lamportClock to set
 	 */
-	public void setLamportClockThreadUnsafe(LamportClock lamportClock) {
+	public void setLamportClockThread(LamportClock lamportClock) {
 		this.lamportClock = lamportClock;
 	}
 
 	/**
 	 * @return the lamportClock
 	 */
-	public LamportClock getLamportClockThreadUnsafe() {
+	public LamportClock getLamportClockThread() {
 		return this.lamportClock;
 	}
 
 	/**
 	 * @return the state
 	 */
-	public CriticalSectionState getStateThreadUnsafe() {
+	public State getStateOfThread() {
 		return this.state;
 	}
 
 	/**
 	 * @param state the state to set
 	 */
-	public void setStateThreadUnsafe(CriticalSectionState state) {
+	public void setStateOfThread(State state) {
 		this.state = state;
 	}
 
@@ -107,32 +106,32 @@ public class ClientData {
 		this.waitForResponsesStructure = new CountDownLatch(1);
 	}
 
-	public void increaseLamportClockThreadUnsafe() {
+	public void increaseLamportClockThread() {
 		this.lamportClock.increase();
 	}
 
 	public void writeLockPermissions() {
 		// this.permissionsLock.writeLock().lock();
 		try {
-			ClientData.permissionsLock.acquire();
+			RicartClientData.permissionsLock.acquire();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void writeUnlockPermissions() {
-		ClientData.permissionsLock.release();
+		RicartClientData.permissionsLock.release();
 	}
 
-	public void addPermissionThreadUnsafe() {
+	public void addPermissionThread() {
 		this.permissions += 1;
 	}
 
-	public int getPermissionsThreadUnsafe() {
+	public int getPermissionsThread() {
 		return this.permissions;
 	}
 
-	public void setPermissionsThreadUnsafe(int permissions) {
+	public void setPermissionsThread(int permissions) {
 		this.permissions = permissions;
 	}
 
@@ -153,16 +152,16 @@ public class ClientData {
 		this.waitSynchronizeSemaphore = new Semaphore(0);
 	}
 
-	public boolean addToQueueThreadUnsafe(Request request) {
+	public boolean addToQueueThreadUnsafe(RestRequest request) {
 		return this.requestQueue.add(request);
 	}
 
-	public Request nextFromQueueThreadUnsafe() {
+	public RestRequest nextFromQueueThreadUnsafe() {
 		return this.requestQueue.remove();
 	}
 
-	public List<Request> removeAllFromQueueThreadUnsafe() {
-		List<Request> l = new ArrayList<>(this.requestQueue);
+	public List<RestRequest> removeAllFromQueueThreadUnsafe() {
+		List<RestRequest> l = new ArrayList<>(this.requestQueue);
 		this.requestQueue = new LinkedList<>();
 		return l;
 	}
@@ -173,7 +172,7 @@ public class ClientData {
 		sb.append("| ID |   ADDRESS   |\n");
 		sb.append("+----+-------------+\n");
 
-		for (Request r : requestQueue) {
+		for (RestRequest r : requestQueue) {
 			sb.append(String.format("| %d  | %s |\n", r.getClientId().getClientID(), r.getClientId().getIpAddress()));
 		}
 

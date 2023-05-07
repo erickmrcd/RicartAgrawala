@@ -1,7 +1,6 @@
 /**
- * Logging utilities.
  * 
- * @author Erick Mercado Hernández
+ * @author Erick José Mercado Hernández
  * @author Daniel
  */
 package logging;

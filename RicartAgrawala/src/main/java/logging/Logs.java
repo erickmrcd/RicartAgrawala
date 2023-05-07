@@ -12,7 +12,7 @@ import java.util.ListIterator;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 
-import client.ClientUID;
+import client.ClientIdentifier;
 import supervisor.Server;
 
 /**
@@ -21,8 +21,8 @@ import supervisor.Server;
  * @author Dani
  *
  */
-public final class Logging {
-	private final static Logger LOGGER = Logger.getLogger(Logging.class.getName());
+public class Logs {
+	private final static Logger LOGGER = Logger.getLogger(Logs.class.getName());
 	private final static String LOG_LINE_FORMAT = "P%s %s %s";
 	private final static String COMPROBADOR_LOGS_DIRECTORY = 
 			System.getProperty("user.home")
@@ -63,7 +63,7 @@ public final class Logging {
 				e.printStackTrace();
 			}
 			
-			Timestamp timestamp = new Timestamp(temp - offsetBounds[0], temp - offsetBounds[1]);
+			TimeStamps timestamp = new TimeStamps(temp - offsetBounds[0], temp - offsetBounds[1]);
 			
 			// Append line of file into buffer
 			newContent.append(
@@ -99,7 +99,7 @@ public final class Logging {
 		Path filename = Paths.get(logFile).getFileName();
 		try(FileWriter fw = 
 				new FileWriter(
-						Logging.COMPROBADOR_LOGS_DIRECTORY + File.separator + filename.toString() + offsetAndDelay[1]
+						Logs.COMPROBADOR_LOGS_DIRECTORY + File.separator + filename.toString() + offsetAndDelay[1]
 				)
 		) {
 			fw.write(new String(comprobadorFileContent));
@@ -132,14 +132,14 @@ public final class Logging {
 
 	public static String logMessage(String pid, String type) {	
 		return String.format(
-				Logging.LOG_LINE_FORMAT + "\n",
+				Logs.LOG_LINE_FORMAT + "\n",
 				pid,
 				(type.equals("Enter")) ? "E" : "S",
 				String.format("%d", System.currentTimeMillis())
 		);
 	}
 	
-	public static void doLog(ClientUID guid, String fileContent) {
+	public static void doLog(ClientIdentifier guid, String fileContent) {
 		String filename = guid.toUniqueFilename("log");
 		
 		// Writes content from buffer into filename of the client with given GUID
@@ -158,7 +158,7 @@ public static boolean checkLog(String logFile) throws IOException {
 		
 		LOGGER.info("Checking log correction...");
 		
-		Timestamp lastTimestamp = new Timestamp(-1, -1);
+		TimeStamps lastTimestamp = new TimeStamps(-1, -1);
 		int inCriticalSection = -1;
 		
 		List<String> fileLines;
@@ -174,7 +174,7 @@ public static boolean checkLog(String logFile) throws IOException {
 			String[] lineParts = digestLogFileLine(line);
 			int currentPid = Integer.parseInt(lineParts[0]);
 			String messageType = lineParts[1];
-			Timestamp currentTimestamp = new Timestamp(lineParts[2]);  // Position 2 is timestamp
+			TimeStamps currentTimestamp = new TimeStamps(lineParts[2]);  // Position 2 is timestamp
 			
 			// Check order
 			if (currentTimestamp.compareTo(lastTimestamp) < 0) {
@@ -244,13 +244,13 @@ public static boolean checkLog(String logFile) throws IOException {
 		while(filesLeft > 1) {
 			
 			int leastTimestampLineIndex = -1;
-			Timestamp leastTimestamp = null, tempTimestamp = null;
+			TimeStamps leastTimestamp = null, tempTimestamp = null;
 			
 			// Find starting line
 			for(int i = 0; i < currentLines.size(); ++i) {
 				if (currentLines.get(i) != null) {
 					leastTimestampLineIndex = i;
-					leastTimestamp = new Timestamp(digestLogFileLine(currentLines.get(i))[2]);
+					leastTimestamp = new TimeStamps(digestLogFileLine(currentLines.get(i))[2]);
 					break;
 				}
 			}
@@ -258,7 +258,7 @@ public static boolean checkLog(String logFile) throws IOException {
 			for (int i = leastTimestampLineIndex; i < currentLines.size(); ++i) {
 				if (currentLines.get(i) == null) 
 					continue;
-				tempTimestamp = new Timestamp(digestLogFileLine(currentLines.get(i))[2]);
+				tempTimestamp = new TimeStamps(digestLogFileLine(currentLines.get(i))[2]);
 				int comparison = tempTimestamp.compareTo(leastTimestamp);
 				if (comparison < 0 || 
 						(comparison == 0 && tempTimestamp.getLowerBound() < leastTimestamp.getLowerBound())) 

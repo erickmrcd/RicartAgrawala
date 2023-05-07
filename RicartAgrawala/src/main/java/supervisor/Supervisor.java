@@ -12,13 +12,12 @@ import java.util.Collections;
 
 import javax.ws.rs.core.MediaType;
 
-import client.ClientUID;
-import logging.Logging;
+import client.ClientIdentifier;
+import logging.Logs;
 import utils.RestHandler;
-import utils.SynchronizationException;
-import utils.SynchronizationUtils;
+import utils.ConcurrencyException;
 import utils.MarzulloTuple;
-import utils.RESTParameter;
+import utils.RestParameter;
 
 /**
  * @author erick
@@ -27,7 +26,7 @@ import utils.RESTParameter;
 public class Supervisor {
 
 	private static RestHandler restHandler;
-	private static List<ClientUID> clients;
+	private static List<ClientIdentifier> clients;
 	private static List<String> logFilenames = null;
 	private static String ipNodo1;
 	private static String ipNodo2;
@@ -68,26 +67,26 @@ public class Supervisor {
 		}
 
 		setSupervisor("http://" + getIpNodo1() + ":8080/RicartAgrawala");
-		Map<ClientUID, long[]> bestEstimations = new HashMap<>();
-		Map<ClientUID, List<long[]>> estimations = new HashMap<>();
+		Map<ClientIdentifier, long[]> bestEstimations = new HashMap<>();
+		Map<ClientIdentifier, List<long[]>> estimations = new HashMap<>();
 		clients = new ArrayList<>();
 		System.out.println(numClientes);
 		for (int i = 0; i < numClientes; i++) {
 			if (numClientes == 2) {
-				clients.add(new ClientUID(getIpNodo1(), i));
+				clients.add(new ClientIdentifier(getIpNodo1(), i));
 			} else if (numClientes == 4) {
 				if (i < 2) {
-					clients.add(new ClientUID(getIpNodo1(), i));
+					clients.add(new ClientIdentifier(getIpNodo1(), i));
 				} else {
-					clients.add(new ClientUID(getIpNodo2(), i));
+					clients.add(new ClientIdentifier(getIpNodo2(), i));
 				}
 			} else {
 				if (i < 2) {
-					clients.add(new ClientUID(getIpNodo1(), i));
+					clients.add(new ClientIdentifier(getIpNodo1(), i));
 				} else if (i >= 2 && i < 4) {
-					clients.add(new ClientUID(getIpNodo2(), i));
+					clients.add(new ClientIdentifier(getIpNodo2(), i));
 				} else {
-					clients.add(new ClientUID(getIpNodo3(), i));
+					clients.add(new ClientIdentifier(getIpNodo3(), i));
 				}
 			}
 		}
@@ -95,10 +94,10 @@ public class Supervisor {
 		restHandler = new RestHandler(getSupervisor());
 		// System.out.println(getSupervisor());
 		restHandler.callWebService("/supervisor/setup",
-				new RESTParameter("num_clients", String.valueOf(clients.size())));
+				new RestParameter("num_clients", String.valueOf(clients.size())));
 		try {
 			runEstimations(clients, estimations);
-		} catch (SynchronizationException e) {
+		} catch (ConcurrencyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
@@ -109,26 +108,26 @@ public class Supervisor {
 
 		try {
 			runEstimations(clients, estimations);
-		} catch (SynchronizationException e) {
+		} catch (ConcurrencyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
 
 		// marzullo
-		for (ClientUID currentUID : clients) {
+		for (ClientIdentifier currentUID : clients) {
 			bestEstimations.put(currentUID, marzullo(estimations.get(currentUID)));
 		}
 
 		for (String filename : logFilenames) {
-			long[] offsetBounds = bestEstimations.get(ClientUID.fromUniqueFilename(filename));
-			Logging.normalizeLog(Server.UPLOAD_LOCATION + File.separator + filename, offsetBounds);
+			long[] offsetBounds = bestEstimations.get(ClientIdentifier.fromUniqueIdentifier(filename));
+			Logs.normalizeLog(Server.UPLOAD_LOCATION + File.separator + filename, offsetBounds);
 		}
 
-		Logging.mergeLogs(logFilenames, "clients.log");
+		Logs.mergeLogs(logFilenames, "clients.log");
 
 		System.out.println(String.format("Log files check result: '%s'",
-				Logging.checkLog("clients.log") ? "Successful execution" : "Critical section violation"));
+				Logs.checkLog("clients.log") ? "Successful execution" : "Critical section violation"));
 
 		Scanner scanner = new Scanner(System.in);
 		System.out.print("Execution of Supervisor finished. Press any key to close...");
@@ -136,9 +135,9 @@ public class Supervisor {
 		scanner.close();
 	}
 
-	private static void runEstimations(List<ClientUID> clients, Map<ClientUID, List<long[]>> estimations)
-			throws SynchronizationException {
-		for (ClientUID currentID : clients) {
+	private static void runEstimations(List<ClientIdentifier> clients, Map<ClientIdentifier, List<long[]>> estimations)
+			throws ConcurrencyException {
+		for (ClientIdentifier currentID : clients) {
 			// Add IP to Map
 			if (!estimations.keySet().contains(currentID)) {
 				estimations.put(currentID, new ArrayList<long[]>());
@@ -148,7 +147,7 @@ public class Supervisor {
 			List<long[]> currentEstimation = estimateOffset(currentID);
 			if (null == currentEstimation) {
 
-				throw new SynchronizationException();
+				throw new ConcurrencyException();
 			}
 
 			// Stores estimations for the current client
@@ -158,7 +157,7 @@ public class Supervisor {
 		}
 	}
 
-	private static List<long[]> estimateOffset(ClientUID currentID) {
+	private static List<long[]> estimateOffset(ClientIdentifier currentID) {
 		// TODO Auto-generated method stub
 		List<long[]> offsetDelayPairs = new ArrayList<>();
 		long[] timeStamps = new long[4]; // Times t0, t1, t2 , t3
@@ -184,22 +183,43 @@ public class Supervisor {
 			// Add 't1' and 't2' to array
 			timeStamps[1] = serverTimes[0];
 			timeStamps[2] = serverTimes[1];
-
+			
 			// Calculate offset and delay
-			offsetDelayPairs.add(new long[] { SynchronizationUtils.calculateOffset(timeStamps),
-					SynchronizationUtils.calculateDelay(timeStamps) });
+			offsetDelayPairs.add(new long[] { calculateOffset(timeStamps),
+					calculateDelay(timeStamps) });
 		}
 
 		return offsetDelayPairs;
 	}
 
-	private static long[] ntpSync(RestHandler webUtils, ClientUID clientID, boolean lastSync) {
+	private static long calculateDelay(long[] timeStamps) {
+		return calculateDelay(timeStamps[0], timeStamps[1], timeStamps[2], timeStamps[3]);
+	}
+
+	public static long calculateOffset(long[] timestamps) {
+		return calculateOffset(timestamps[0], timestamps[1], timestamps[2], timestamps[3]);
+	}
+	
+	public static long calculateDelay(long t0, long t1, long t2, long t3) {
+		long t = t1 - t0;
+		long t_ = t3 - t2;
+		long d = t + t_;
+		return d;
+	}
+
+	public static long calculateOffset(long t0, long t1, long t2, long t3) {
+		// Calculate offset estimation
+		long o_ = (t1 - t0 + t2 - t3) / 2;
+		return o_;
+	}
+
+	private static long[] ntpSync(RestHandler webUtils, ClientIdentifier clientID, boolean lastSync) {
 		String delimiter = "#";
 		long[] requestPair = new long[10];
 		// Send request
 		String timesString = webUtils.callWebService(MediaType.TEXT_PLAIN, "/rest/synchronize",
-				new RESTParameter[] { new RESTParameter("id", clientID.toUniqueFilename()),
-						new RESTParameter("finished", String.valueOf(lastSync)) });
+				new RestParameter[] { new RestParameter("id", clientID.toUniqueIdentifier()),
+						new RestParameter("finished", String.valueOf(lastSync)) });
 
 		// Split the times separated by #
 		String[] timePair = timesString.split(delimiter);

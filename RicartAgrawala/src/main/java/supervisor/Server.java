@@ -17,8 +17,8 @@ import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.OutputStream;
-import client.ClientUID;
-import utils.SynchronizationException;
+import client.ClientIdentifier;
+import utils.ConcurrencyException;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -61,7 +61,7 @@ public class Server {
 	}
 
 	private Semaphore availableLogsSemaphore = new Semaphore(0);
-	private static List<ClientUID> finishedClients = new ArrayList<>();
+	private static List<ClientIdentifier> finishedClients = new ArrayList<>();
 	private static int NUMBER_OF_CLIENTS_WAITING;
 
 	@GET
@@ -97,23 +97,23 @@ public class Server {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response inform(
 			@FormDataParam("file") InputStream is,
-			@FormDataParam("file") FormDataContentDisposition fdcd) throws SynchronizationException, IOException
+			@FormDataParam("file") FormDataContentDisposition fdcd) throws ConcurrencyException, IOException
 	{
-		ClientUID clientUID = null;
+		ClientIdentifier clientUID = null;
 		try {
-			clientUID = ClientUID.fromUniqueFilename(fdcd.getFileName());
+			clientUID = ClientIdentifier.fromUniqueIdentifier(fdcd.getFileName());
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		LOGGER.log(Level.INFO, String.format(
 				"Client finished: {%s, %s}",
-				clientUID.toUniqueFilename(),
+				clientUID.toUniqueIdentifier(),
 				fdcd.getFileName())
 		);
 		
 		// Duplicate if already true
 		if (finishedClients.contains(clientUID)) {
-			throw new SynchronizationException(String.format("Client %s had already finished", clientUID.toString()));
+			throw new ConcurrencyException(String.format("Client %s had already finished", clientUID.toString()));
 		}
 		
 		// Create directory if it does not exists
